@@ -16,6 +16,7 @@ temperatures:
   skeleton: 0.8
   sensory: 0.85
   trimmed: 0.7
+  elevate: 0.85
   review: 0.3
 
 # 生成参数

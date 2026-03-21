@@ -513,13 +513,11 @@ def check_relationship_target_existence(
             continue
         from_id = rel.get("from")
         to_id = rel.get("to")
-        from_name = rel.get("from_name", from_id)
-        to_name = rel.get("to_name", to_id)
 
         if from_id and from_id not in char_map:
-            issues.append(f"关系记录中 from={from_id} ({from_name}) 不存在对应人物档案")
+            issues.append(f"关系记录中 from={from_id} 不存在对应人物档案")
         if to_id and to_id not in char_map:
-            issues.append(f"关系记录中 to={to_id} ({to_name}) 不存在对应人物档案")
+            issues.append(f"关系记录中 to={to_id} 不存在对应人物档案")
 
     if issues:
         result.level = "FAIL"
@@ -778,7 +776,8 @@ def check_outline_state_consistency(
                         found_dup = False
                         for ms_key in milestone_events:
                             ms_char, ms_event = ms_key.split(":", 1)
-                            if ms_char == char_id and ms_event in note:
+                            # 要求里程碑事件描述至少4字，避免"突破"等短词误匹配
+                            if ms_char == char_id and len(ms_event) >= 4 and ms_event in note:
                                 found_dup = True
                                 break
                         if found_dup:

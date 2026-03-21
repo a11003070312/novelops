@@ -48,7 +48,15 @@ if missing:
 # 索引检查
 # ---------------------------------------------------------------------------
 
-root = Path(__file__).parent.parent
+# 向上查找包含 ENTRY.md 的项目根目录（与其他脚本保持一致）
+def _find_root() -> Path:
+    here = Path(__file__).resolve()
+    for parent in [here.parent, *here.parents]:
+        if (parent / "ENTRY.md").exists():
+            return parent
+    return here.parent.parent  # fallback
+
+root = _find_root()
 db_dir = root / ".vector-db"
 
 # 索引存在且 lance.db 子目录已建立才算就绪

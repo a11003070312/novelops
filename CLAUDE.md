@@ -162,7 +162,7 @@ Requires `DASHSCOPE_API_KEY` in `.env`.
 1. Always read `state/session-state.yaml` first
 2. Pre-check before writing, write before updating state
 3. All state changes must be written to files, not just mentioned in conversation
-4. Complete all 6 phases before ending a session
+4. Complete all phases (Phase 1 through Phase 6, including 1.5 and 4.5) before ending a session
 5. Stop and report conflicts to human — never fabricate explanations
 6. Strictly follow `anti-ai-patterns.yaml` banned words and patterns
 7. Foreshadowing reveal timing follows `plot-threads.yaml` — never reveal early

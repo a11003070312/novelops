@@ -342,6 +342,7 @@ def check_banned_patterns(
             continue
 
         max_occ = entry.get("max_occurrences", 0)
+        # critical/high：任何匹配即 FAIL，max_occurrences 对这两个级别无效
         if severity in ("critical", "high"):
             level = "FAIL"
         elif severity == "medium" and max_occ > 0 and len(hits) > max_occ:
