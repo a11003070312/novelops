@@ -16,17 +16,18 @@ NovelOps 的做法：**工程化**。把每章的创作流程拆成6个强制阶
 
 ## 核心特性
 
-### 六阶段章节流水线
+### 八阶段章节流水线
 
 每章必须按顺序跑完所有阶段，不得跳过：
 
 | 阶段 | 名称 | 核心动作 |
 |------|------|--------|
 | Phase 1 | 上下文组装 + 写前检查 | 加载角色/场景/伏笔状态，双通道事实检索，覆盖矩阵验证 |
-| Phase 1.5 | 情绪板确认 | 纯中文子代理生成情绪板，隔离英文系统提示词污染 |
+| Phase 1.5 | 场景设计 + 战斗工作坊 | 纯中文子代理生成情绪板；有重要战斗时启动五步设计法 |
 | Phase 2 | 章节写作（两稿制） | 极简创作指令 → Opus 子代理初稿 → 主会话事实核验 → 定稿 |
 | Phase 3 | 写后自检 | scan-text.py 扫描 + 人工朗读通顺性检查 |
 | Phase 4 | 人类审核 | 等待确认，可要求修改或重写 |
+| Phase 4.5 | 标题定稿 | 提出候选标题，人类选定后写入章节文件和大纲 |
 | Phase 5 | 状态更新 | 更新所有状态文件，提取事实，重建向量索引 |
 | Phase 6 | 收尾 | 生成下章大纲，更新会话状态 |
 
@@ -91,14 +92,29 @@ cd my-novel
 # 安装脚本依赖
 pip install -r scripts/requirements.txt
 
+# 安装向量检索依赖（可选，推荐在超过30章后启用）
+pip install -r scripts/requirements-vector.txt
+# 首次运行 vector-search.py 时会自动下载 bge-base-zh-v1.5 模型（约400MB），之后自动缓存
+# 如不需要向量检索，跳过此步骤，仅使用 search-facts.py 的关键词检索即可
+
 # 配置 API Key（可选，Qwen 备用通道）
 cp .env.example .env
 # 编辑 .env，填入 DASHSCOPE_API_KEY
 ```
 
+### 每次对话的启动方式（重要）
+
+**每次开启新对话时，必须先 @ 入口文件：**
+
+```
+@ENTRY.md
+```
+
+ENTRY.md 是 Claude 的完整操作手册，包含所有 Phase 流程定义、铁律和报告格式。不 @ 这个文件，Claude 将无法执行正确的写作流程。CLAUDE.md 只是摘要，不能替代 ENTRY.md。
+
 ### 启动新书
 
-在 Claude Code 中打开项目目录，发送任意消息。Claude 会检测到 `state/session-state.yaml` 不存在，自动进入新书引导流程（ENTRY.md 附录B）。
+在 Claude Code 中打开项目目录，发送 `@ENTRY.md`。Claude 会检测到 `state/session-state.yaml` 不存在，自动进入新书引导流程（ENTRY.md 附录B）。
 
 引导流程分四个阶段，每阶段人类确认后进入下一阶段：
 
@@ -109,7 +125,7 @@ cp .env.example .env
 
 ### 继续已有项目
 
-Claude 每次新会话都会先读取 `state/session-state.yaml`，恢复上次进度，报告当前状态，等待你确认后继续。
+发送 `@ENTRY.md`，Claude 会读取 `state/session-state.yaml` 恢复上次进度，报告当前状态，等待你确认后继续。
 
 ---
 
@@ -262,9 +278,3 @@ MIT License — 自由使用、修改、分发。
 
 ---
 
-## 致谢
-
-框架的写作哲学受以下作品影响：
-- 《诛仙》萧鼎 — 文笔标杆
-- 《凡人修仙传》忘语 — 叙事逻辑
-- 《JOJO的奇妙冒险》荒木飞吕彦 — 战斗设计

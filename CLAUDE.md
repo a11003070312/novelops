@@ -52,7 +52,7 @@ Every new session must follow this sequence:
 2. Report status to human before proceeding
 3. Never skip directly to writing
 
-## Core Workflow: 6-Phase Chapter Pipeline
+## Core Workflow: 8-Phase Chapter Pipeline
 
 Each chapter follows these phases in strict order. Never skip phases or end a session mid-pipeline.
 

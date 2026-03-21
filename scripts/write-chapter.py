@@ -18,6 +18,27 @@ Claude 负责 Phase 1/1.5 的上下文组装，本脚本负责 Phase 2 的文本
 
   # 调试：只打印 prompt 不调用 API
   python scripts/write-chapter.py --chapter 2 --draft skeleton --context-file state/writing-context.json --dry-run
+
+BACKUP CHANNEL NOTE
+-------------------
+This script is the Qwen API backup channel for Phase 2 chapter writing.
+It is NOT compatible with the default Claude sub-agent workflow in ENTRY.md
+Phase 2.0 (which produces state/creative-prompt.md — free-text Markdown).
+
+To use this script, you must manually generate state/writing-context.json
+with the following top-level keys:
+  chapter_number (int)          -- chapter number
+  chapter_outline (dict)        -- content from outline/chapters/chapter-XXXX.yaml
+  characters (list[dict])       -- character summaries for scene participants
+  retrieved_knowledge (list)    -- facts from search-facts.py + vector-search.py
+  mood_board (str)              -- from Phase 1.5 scene design (Chinese prose)
+  active_emotion_threads (list) -- from state/emotion-threads.yaml
+  character_milestones (dict)   -- from state/milestones.yaml (per character)
+  forbidden_concepts (list)     -- from config/writing-style.yaml
+  terminology_rules (list)      -- from config/writing-style.yaml
+
+The Claude sub-agent workflow documented in ENTRY.md is the primary workflow
+and is preferred. This script is retained as a fallback only.
 """
 
 import argparse
@@ -1059,13 +1080,16 @@ def call_qwen_api(
                 f"temp={temperature})",
                 file=sys.stderr,
             )
+            # Only Qwen 3 series (qwen3-*) supports enable_thinking
+            supports_thinking = current_model.startswith("qwen3")
+            extra = {"enable_thinking": True} if supports_thinking else {}
             response = client.chat.completions.create(
                 model=current_model,
                 messages=messages,
                 temperature=temperature,
                 max_tokens=max_tokens,
                 top_p=top_p,
-                extra_body={"enable_thinking": True},
+                extra_body=extra,
                 stream=True,
             )
             thinking_parts = []

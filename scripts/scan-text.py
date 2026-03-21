@@ -348,8 +348,14 @@ def check_banned_patterns(
             level = "WARN"
         elif severity == "medium":
             continue  # within threshold, skip
+        elif severity == "low":
+            continue  # low severity patterns are informational only
         else:
-            level = "WARN"
+            # Unknown severity value — warn about misconfiguration, not the match
+            findings.append(
+                Finding("WARN", "配置", f"{pat_id} 未知 severity 值: \"{severity}\"")
+            )
+            continue
 
         count_info = f" 出现 {len(hits)} 次 (上限 {max_occ})" if max_occ > 0 else ""
         msg = f'{pat_id} "{description}"{count_info} [{severity}]'

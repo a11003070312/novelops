@@ -34,21 +34,69 @@
 
 **无论任何情况，新会话开始后，按以下顺序执行：**
 
-### 1.0 环境就绪检查（静默执行，无需报告人类）
+### 1.0 环境就绪检查
 
-运行以下命令，确保校验脚本的依赖已安装：
+**步骤 1：基础依赖（静默执行，无需报告人类）**
 
 ```bash
 pip install -r scripts/requirements.txt -q 2>/dev/null || pip install pyyaml -q
-```
-
-然后运行一次快速验证，确认脚本可用：
-
-```bash
 python -c "import yaml; print('OK')"
 ```
 
 如果输出不是 OK，停止并报告人类："校验脚本环境异常，请检查 Python 和 PyYAML 是否可用。"
+
+**步骤 2：向量检索环境检测（每次会话必跑）**
+
+```bash
+python scripts/check-vector.py
+```
+
+根据输出决定后续动作：
+
+| 输出 | 含义 | 动作 |
+|------|------|------|
+| `VECTOR_OK` | 依赖已安装，索引已建立 | 静默通过，继续 1.1 |
+| `INDEX_MISSING` | 依赖已安装，但索引尚未建立 | 向人类提问（见下方）|
+| `DEPS_MISSING: ...` | 向量检索依赖未安装 | 向人类提问（见下方）|
+
+**输出为 `DEPS_MISSING` 时，向人类发出以下提问：**
+
+```
+向量检索依赖尚未安装（lancedb / sentence-transformers / pyarrow）。
+
+向量检索是 Phase 1 语义检索的必要组件，用于在章节数量增多后
+找到关键词检索无法覆盖的隐式关联。
+
+是否现在安装？
+  是 → 我将运行: pip install -r scripts/requirements-vector.txt
+       首次运行时还需下载 bge-base-zh-v1.5 模型（约400MB），请确保网络畅通。
+       安装完成后自动建立初始索引。
+  否 → 跳过，本次会话使用 search-facts.py 关键词检索代替。
+
+（如需使用国内镜像：pip install -r scripts/requirements-vector.txt -i https://pypi.tuna.tsinghua.edu.cn/simple）
+```
+
+人类回复"是"后执行：
+```bash
+pip install -r scripts/requirements-vector.txt
+python scripts/vector-search.py --rebuild
+```
+
+**输出为 `INDEX_MISSING` 时，向人类发出以下提问：**
+
+```
+向量检索依赖已就绪，但索引尚未建立（或已被清除）。
+
+是否现在建立索引？
+  是 → 我将运行: python scripts/vector-search.py --rebuild
+       模型 bge-base-zh-v1.5 若已缓存则直接使用；若未缓存则自动下载（约400MB）。
+  否 → 跳过，本次会话使用 search-facts.py 关键词检索代替。
+```
+
+人类回复"是"后执行：
+```bash
+python scripts/vector-search.py --rebuild
+```
 
 ### 1.1 检测框架状态
 

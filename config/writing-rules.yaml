@@ -110,7 +110,7 @@ emotion_driver:
 selling_points:
 
   instant_gratification:
-    rule: "即时满足感是核心。注意：本书核心卖点是'所有角色智商在线'（见project.yaml），反派不降智——爽感来自主角的情报优势和精准判断，而非对手犯蠢"
+    rule: "即时满足感是核心。爽感的来源由本书核心卖点决定（见 project.yaml core_hooks），根据实际设定填写此处。"
     guidelines:
       - "主角必须有后手，逢赌必赢（但过程要有波折）"
       - "不要让读者等太久才看到回报"

@@ -8,7 +8,7 @@ api_base: "https://dashscope.aliyuncs.com/compatible-mode/v1"
 
 # 模型配置
 models:
-  primary: "qwen3.5-plus"
+  primary: "qwen3-plus"
   fallback: "qwen-max"
 
 # 每稿温度（骨架稿偏高鼓励创意，删减稿偏低保持克制，机审稿最低保持精确）

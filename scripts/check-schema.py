@@ -511,6 +511,78 @@ def validate_plot_threads_yaml(data, result: FileResult):
             elif not isinstance(thread["resolved_chapter"], int):
                 result.fail(f"{prefix}.resolved_chapter 必须是整数")
 
+    # abandoned_threads (optional, but if present validate entries)
+    if "abandoned_threads" in data and isinstance(data["abandoned_threads"], list):
+        for idx, thread in enumerate(data["abandoned_threads"]):
+            prefix = f"abandoned_threads[{idx}]"
+            if not isinstance(thread, dict):
+                result.fail(f"{prefix} 必须是字典")
+                continue
+            if "id" not in thread:
+                result.fail(f"{prefix} 缺少必填字段: id")
+            elif not is_nonempty_string(thread["id"]):
+                result.fail(f"{prefix}.id 不能为空字符串")
+            if "abandoned_chapter" not in thread:
+                result.fail(f"{prefix} 缺少必填字段: abandoned_chapter")
+            elif not isinstance(thread["abandoned_chapter"], int):
+                result.fail(f"{prefix}.abandoned_chapter 必须是整数")
+
+    if not result.has_fail and not result.has_warn:
+        result.ok()
+
+
+def validate_plot_pattern_tracker_yaml(data, result: FileResult):
+    """Validate state/plot-pattern-tracker.yaml."""
+    if not isinstance(data, dict):
+        result.fail("文件内容不是有效的 YAML 字典")
+        return
+
+    # conflict_patterns must be a list
+    if "conflict_patterns" in data:
+        if not isinstance(data["conflict_patterns"], list):
+            result.fail("conflict_patterns 必须是列表")
+        else:
+            for idx, entry in enumerate(data["conflict_patterns"]):
+                prefix = f"conflict_patterns[{idx}]"
+                if not isinstance(entry, dict):
+                    result.fail(f"{prefix} 必须是字典")
+                    continue
+                if "pattern" not in entry:
+                    result.fail(f"{prefix} 缺少必填字段: pattern")
+                if "occurrences" in entry and not isinstance(entry["occurrences"], list):
+                    result.fail(f"{prefix}.occurrences 必须是列表")
+
+    # emotional_beats must be a list
+    if "emotional_beats" in data:
+        if not isinstance(data["emotional_beats"], list):
+            result.fail("emotional_beats 必须是列表")
+
+    # recent_openings must be a list
+    if "recent_openings" in data:
+        if not isinstance(data["recent_openings"], list):
+            result.fail("recent_openings 必须是列表")
+        else:
+            for idx, entry in enumerate(data["recent_openings"]):
+                prefix = f"recent_openings[{idx}]"
+                if not isinstance(entry, dict):
+                    result.fail(f"{prefix} 必须是字典")
+                    continue
+                if "chapter" not in entry:
+                    result.fail(f"{prefix} 缺少必填字段: chapter")
+                elif not isinstance(entry["chapter"], int):
+                    result.fail(f"{prefix}.chapter 必须是整数")
+                if "type" not in entry:
+                    result.fail(f"{prefix} 缺少必填字段: type")
+
+    # consecutive_same_type must be a dict
+    if "consecutive_same_type" in data:
+        cst = data["consecutive_same_type"]
+        if not isinstance(cst, dict):
+            result.fail("consecutive_same_type 必须是字典")
+        else:
+            if "count" in cst and not isinstance(cst["count"], int):
+                result.fail("consecutive_same_type.count 必须是整数")
+
     if not result.has_fail and not result.has_warn:
         result.ok()
 
@@ -1048,10 +1120,16 @@ def detect_and_validate(filepath: Path, root: Path) -> FileResult:
         validate_chapter_summary_yaml(data, result)
     elif re.match(r"state/summaries/arcs/arc-.*-summary\.md$", rel_posix):
         validate_arc_summary_md(data, result)
+    elif rel_posix == "state/plot-pattern-tracker.yaml":
+        validate_plot_pattern_tracker_yaml(data, result)
     elif rel_posix in (
         "state/relationships.yaml",
         "state/timeline.yaml",
         "state/world-state.yaml",
+        "state/milestones.yaml",
+        "state/pacing-tracker.yaml",
+        "state/emotion-threads.yaml",
+        "state/character-appearances.yaml",
     ):
         validate_yaml_parseable(data, result)
     elif rel_posix.startswith("config/") and filepath.suffix == ".yaml":
@@ -1138,8 +1216,17 @@ def discover_files(root: Path) -> list[Path]:
             if not should_skip(f):
                 files.append(f)
 
-    # state YAML files (relationships, timeline, world-state)
-    for name in ("relationships.yaml", "timeline.yaml", "world-state.yaml"):
+    # state YAML files
+    for name in (
+        "relationships.yaml",
+        "timeline.yaml",
+        "world-state.yaml",
+        "plot-pattern-tracker.yaml",
+        "milestones.yaml",
+        "pacing-tracker.yaml",
+        "emotion-threads.yaml",
+        "character-appearances.yaml",
+    ):
         p = root / "state" / name
         if p.exists():
             files.append(p)

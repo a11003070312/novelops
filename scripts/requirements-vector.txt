@@ -1,0 +1,5 @@
+# 向量检索依赖 (vector-search.py)
+# 安装命令: pip install -r scripts/requirements-vector.txt
+lancedb>=0.4
+sentence-transformers>=2.2
+pyarrow>=14.0

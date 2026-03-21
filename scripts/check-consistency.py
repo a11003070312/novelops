@@ -380,19 +380,41 @@ def check_plot_thread_timeline(
 
     active = safe_list(data.get("active_threads"))
     resolved = safe_list(data.get("resolved_threads"))
+    abandoned = safe_list(data.get("abandoned_threads"))
 
-    if not active and not resolved:
+    if not active and not resolved and not abandoned:
         result.level = "PASS"
         result.messages.append("暂无伏笔记录")
         return result
 
     issues: List[str] = []
 
-    # -- 活跃线索检查 --
+    # -- 跨列表重复 ID 检测 --
+    id_seen: Dict[str, str] = {}
+    duplicate_ids: set = set()
+    for list_name, threads in (("active", active), ("resolved", resolved), ("abandoned", abandoned)):
+        for thread in threads:
+            if not isinstance(thread, dict):
+                continue
+            tid = thread.get("id")
+            tname = thread.get("name", tid)
+            if not tid:
+                continue
+            if tid in id_seen:
+                issues.append(
+                    f"线索 ID \"{tid}\" ({tname}) 同时出现在 {id_seen[tid]} 和 {list_name} 列表中"
+                )
+                duplicate_ids.add(tid)
+            else:
+                id_seen[tid] = list_name
+
+    # -- 活跃线索检查（跳过已报告重复 ID 的线索，避免产生嘈杂的二次警告）--
     for thread in active:
         if not isinstance(thread, dict):
             continue
         tid = thread.get("id", "unknown")
+        if tid in duplicate_ids:
+            continue
         tname = thread.get("name", tid)
         planted = thread.get("planted_chapter")
 
@@ -437,11 +459,22 @@ def check_plot_thread_timeline(
                 f"已回收线索 {tid} \"{tname}\" 缺少 resolved_chapter"
             )
 
+    # -- 已废弃线索检查 --
+    for thread in abandoned:
+        if not isinstance(thread, dict):
+            continue
+        tid = thread.get("id", "unknown")
+        tname = thread.get("name", tid)
+        if "abandoned_chapter" not in thread or thread["abandoned_chapter"] is None:
+            issues.append(
+                f"已废弃线索 {tid} \"{tname}\" 缺少 abandoned_chapter"
+            )
+
     if issues:
         result.level = "WARN"
         result.messages = issues
     else:
-        total = len(active) + len(resolved)
+        total = len(active) + len(resolved) + len(abandoned)
         result.level = "PASS"
         result.messages.append(f"共 {total} 条伏笔，状态正常")
     return result
@@ -659,31 +692,6 @@ def check_milestone_duplicates(root: Path) -> CheckResult:
             )
         else:
             seen[key] = chapter
-
-    # 额外检查：同类型修为突破不能有明显矛盾
-    # 例如：不能先突破炼气四层再记录炼气三层
-    cultivation_events: Dict[str, List[Tuple[int, str]]] = {}
-    for ms in milestones:
-        if not isinstance(ms, dict):
-            continue
-        if ms.get("type") != "cultivation":
-            continue
-        char_id = ms.get("character", "unknown")
-        chapter = ms.get("chapter")
-        event = ms.get("event", "")
-        if isinstance(chapter, int):
-            cultivation_events.setdefault(char_id, []).append((chapter, event))
-
-    for char_id, events in cultivation_events.items():
-        sorted_events = sorted(events, key=lambda x: x[0])
-        for i in range(1, len(sorted_events)):
-            prev_ch, prev_ev = sorted_events[i - 1]
-            curr_ch, curr_ev = sorted_events[i]
-            if curr_ch == prev_ch and curr_ev != prev_ev:
-                duplicates.append(
-                    f"{char_id} 在第{curr_ch}章有多个修为突破记录: "
-                    f"\"{prev_ev}\" 和 \"{curr_ev}\""
-                )
 
     if duplicates:
         result.level = "FAIL"

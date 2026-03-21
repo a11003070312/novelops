@@ -112,8 +112,8 @@ native_chinese_rules:
 
 # 参考标杆（按文笔权重排序）
 reference_works:
-  - title: "诛仙"
-    aspect: "文笔的第一参考。意境感、环境描写的水墨画面感、以景写情、克制中的力量感"
+  - title: "[填写文笔第一参考作品]"
+    aspect: "[参考哪个方面：文笔节奏/意境/对话/战斗等]"
     weight: "最高"
   - title: "[填写其他参考作品]"
     aspect: "[参考哪个方面]"

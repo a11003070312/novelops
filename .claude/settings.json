@@ -9,13 +9,13 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'set -o pipefail; if echo \"$CLAUDE_FILE_PATH\" | grep -qE \"chapters[/\\\\\\\\].*\\.md$\"; then python scripts/scan-text.py \"$CLAUDE_FILE_PATH\" 2>&1 | tail -80; fi'",
+            "command": "bash -c 'set -o pipefail; if echo \"$CLAUDE_FILE_PATH\" | grep -qiE \"[/\\\\\\\\]chapters[/\\\\\\\\].*\\.md$\"; then python scripts/scan-text.py \"$CLAUDE_FILE_PATH\" 2>&1 | tail -80; fi'",
             "description": "Auto-scan chapter text after writing",
             "timeout": 30000
           },
           {
             "type": "command",
-            "command": "bash -c 'set -o pipefail; if echo \"$CLAUDE_FILE_PATH\" | grep -qE \"(state|outline|characters|config|locations)[/\\\\\\\\].*\\.(yaml|md)$\"; then python scripts/check-schema.py \"$CLAUDE_FILE_PATH\" 2>&1 | tail -40; fi'",
+            "command": "bash -c 'set -o pipefail; if echo \"$CLAUDE_FILE_PATH\" | grep -qiE \"[/\\\\\\\\](state|outline|characters|config|locations)[/\\\\\\\\].*\\.(yaml|md)$\"; then python scripts/check-schema.py \"$CLAUDE_FILE_PATH\" 2>&1 | tail -40; fi'",
             "description": "Auto-validate YAML schema after writing state/outline/character/config/location files",
             "timeout": 30000
           }
