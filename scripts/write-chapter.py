@@ -441,40 +441,23 @@ def render_prose_quality(prose_ref: dict) -> str:
 # Draft-specific instructions
 # ------------------------------------------------------------------
 def render_draft_instructions(prose_ref: dict, draft_type: str) -> str:
-    """Render draft-specific instructions from three_draft_system."""
+    """Return per-draft task description for the Qwen multi-draft backup channel.
+
+    Note: prose-reference.yaml describes the Claude two-draft system (初稿+定稿),
+    which uses different draft types than the Qwen backup channel (skeleton/sensory/
+    trimmed/elevate). The two systems are intentionally independent; we do not read
+    from prose-reference.yaml here to avoid key mismatches.
+    """
     if draft_type == "review":
         return ""  # review uses its own system prompt
 
-    tds = prose_ref.get("three_draft_system", {})
-
-    draft_key_map = {
-        "skeleton": "draft_1",
-        "sensory": "draft_2",
-        "trimmed": "draft_3",
+    descriptions = {
+        "skeleton": "骨架稿: 专注逻辑链和节奏骨架，不追求文笔细节",
+        "sensory": "感官稿: 在骨架基础上填充五感细节、环境描写、情绪层次",
+        "trimmed": "删减稿: 删除15-20%内容，去掉冗余修饰，让文字更干净有力",
+        "elevate": "升华稿: 在删减稿基础上提升文笔质感，强化意象和节奏",
     }
-    key = draft_key_map.get(draft_type, "")
-    d = tds.get(key, {})
-    if not d:
-        fallback = {
-            "skeleton": "骨架稿: 专注逻辑链和节奏骨架，不追求文笔细节",
-            "sensory": "感官稿: 在骨架基础上填充五感细节、环境描写、情绪层次",
-            "trimmed": "删减稿: 删除15-20%内容，去掉冗余修饰，让文字更干净有力",
-        }
-        return fallback.get(draft_type, "")
-
-    lines = [f"[本稿任务: {d.get('name', '')}]"]
-    focus = d.get("focus", "")
-    if focus:
-        lines.append(f"核心关注: {focus}")
-    word_count = d.get("word_count", "")
-    if word_count:
-        lines.append(f"目标字数: {word_count}")
-    rules = d.get("rules", [])
-    if rules:
-        lines.append("规则:")
-        for r in rules:
-            lines.append(f"  - {r}")
-    return "\n".join(lines)
+    return descriptions.get(draft_type, "")
 
 
 # ------------------------------------------------------------------

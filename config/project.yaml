@@ -3,6 +3,8 @@
 # ============================================================
 
 # 基本信息
+# 注意：以下 [REQUIRED] 字段为空时 check-schema.py 会报 FAIL。
+# 这是预期行为——模板在新书启动流程（ENTRY.md 附录B）Stage 1 填写后才应运行校验。
 title: ""                                    # [REQUIRED] 书名
 author: ""                                   # [OPTIONAL] 笔名
 platform: "番茄小说"                          # [OPTIONAL] 发布平台
