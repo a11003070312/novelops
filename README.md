@@ -264,11 +264,11 @@ scan-text.py 的输出必须原文贴入报告，不能只声明"已检查"。ch
 
 ```bash
 # 1. 在 .env 配置 DASHSCOPE_API_KEY
-# 2. 确保 state/creative-prompt.md 已由 Phase 2.0 生成
-python scripts/write-chapter.py --chapter N --draft skeleton
+# 2. 手动生成 state/writing-context.json（字段说明见 write-chapter.py 顶部注释）
+python scripts/write-chapter.py --chapter N --draft skeleton --context-file state/writing-context.json
 ```
 
-这是在 Claude 子代理输出不满意时的备选方案，不是默认流程。
+注意：此脚本需要 `state/writing-context.json`（结构化 JSON），与 ENTRY.md Phase 2.0 生成的 `state/creative-prompt.md`（自由文本）不兼容。备用通道的 JSON 格式说明见 `scripts/write-chapter.py` 顶部 BACKUP CHANNEL NOTE。这是在 Claude 子代理输出不满意时的备选方案，不是默认流程。
 
 ---
 

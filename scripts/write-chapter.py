@@ -1120,7 +1120,7 @@ def call_qwen_api(
                 time.sleep(delay)
 
     print(f"[error] all {max_retries} attempts failed: {last_error}", file=sys.stderr)
-    sys.exit(1)
+    sys.exit(EXIT_ERROR)
 
 
 # ------------------------------------------------------------------

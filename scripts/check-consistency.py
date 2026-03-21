@@ -697,28 +697,10 @@ def check_milestone_duplicates(root: Path) -> CheckResult:
         else:
             seen[key] = chapter
 
-    # 同章节同修为类型：检测完全相同的事件记录（同一章两条一模一样的突破记录）
-    cultivation_events: Dict[str, List[Tuple[int, str]]] = {}
-    for ms in milestones:
-        if not isinstance(ms, dict):
-            continue
-        if ms.get("type") != "cultivation":
-            continue
-        char_id = ms.get("character", "unknown")
-        chapter = ms.get("chapter")
-        event = ms.get("event", "")
-        if isinstance(chapter, int):
-            cultivation_events.setdefault(char_id, []).append((chapter, event))
-
-    for char_id, events in cultivation_events.items():
-        sorted_events = sorted(events, key=lambda x: x[0])
-        for i in range(1, len(sorted_events)):
-            prev_ch, prev_ev = sorted_events[i - 1]
-            curr_ch, curr_ev = sorted_events[i]
-            if curr_ch == prev_ch and curr_ev == prev_ev:
-                duplicates.append(
-                    f"{char_id} 在第{curr_ch}章有重复的修为突破记录: \"{curr_ev}\""
-                )
+    # 注：曾经有一个"同章节同事件"二次检查，但已确认是死代码：
+    # 主检查的 seen 字典以 (character, type, event) 为 key，任何两条完全相同的
+    # 记录（无论章节是否相同）都会被主检查捕获。二次检查是主检查的严格子集，
+    # 且会对同一对重复记录产生双重报告。已移除。
 
     if duplicates:
         result.level = "FAIL"

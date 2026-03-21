@@ -10,6 +10,8 @@ Usage:
     python scripts/check-schema.py <file_path>  # validate a specific file
 """
 
+from __future__ import annotations
+
 import datetime
 import io
 import re

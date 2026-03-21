@@ -51,9 +51,11 @@ if missing:
 root = Path(__file__).parent.parent
 db_dir = root / ".vector-db"
 
-# 索引存在且非空才算就绪（lancedb 在 .vector-db/ 下创建子目录）
+# 索引存在且 lance.db 子目录已建立才算就绪
+# 仅检查 .vector-db/ 非空还不够：build_index 可能在写入 fingerprint.txt 后
+# 崩溃，导致目录非空但实际表尚未创建。
 try:
-    index_ready = db_dir.exists() and any(db_dir.iterdir())
+    index_ready = (db_dir / "lance.db").exists()
 except OSError:
     # 目录被其他进程锁定（Windows 常见），保守判断为未就绪
     index_ready = False

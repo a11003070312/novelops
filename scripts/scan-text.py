@@ -11,6 +11,8 @@ scan-text.py -- 小说章节文本去AI感扫描工具
   python scripts/scan-text.py --chapter chapters/arc-001/chapter-0001.md
 """
 
+from __future__ import annotations
+
 import argparse
 import io
 import os
