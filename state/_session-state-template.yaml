@@ -1,0 +1,42 @@
+# ============================================================
+# 会话状态模板 - 框架初始化时复制为 session-state.yaml
+#
+# 字段标记:
+#   [REQUIRED] -- 必填，check-schema.py 会校验
+#   [OPTIONAL] -- 选填
+# ============================================================
+
+last_session:
+  timestamp: ""                         # [REQUIRED] 上次会话时间
+  chapter_completed: 0                  # [REQUIRED] 已完成的最后一章
+  all_phases_done: true                 # [REQUIRED] 上次是否完整完成
+  incomplete_phase: null                # [REQUIRED] 中断的阶段名 (null 表示未中断)
+  phase_artifacts:                      # [OPTIONAL] 中间产物文件路径（用于会话压缩后恢复）
+    phase1_report: null                 # state/phase-reports/phase1-chXXXX.md
+    creative_prompt: null               # state/creative-prompt.md
+    initial_draft: null                 # state/draft-chXXXX.md（初稿暂存，定稿后可删）
+    phase3_report: null                 # state/phase-reports/phase3-chXXXX.md
+    phase5_report: null                 # state/phase-reports/phase5-chXXXX.md
+
+next_session:
+  expected_action: "write_chapter"      # [REQUIRED] write_chapter/new_arc/audit/plan_segment
+  chapter_to_write: 1                   # [REQUIRED] 下一章章节号
+  arc: "arc-001"                        # [REQUIRED] 当前卷ID (格式 arc-\d+)
+  attention_notes: []                   # [OPTIONAL] 注意事项列表
+
+# 自主生产模式状态（autonomous mode）
+# [OPTIONAL] 不使用自主模式时这些字段可全部省略
+autonomous_mode: false                  # 是否处于自主段落生产模式
+
+current_segment:                        # 当前正在执行的段落
+  id: null                              # seg-XXX-YY，null 表示未开始
+  chapter_completed_in_segment: 0       # 本段已完成章节数
+  total_chapters_in_segment: 0          # 本段计划总章节数
+  exit_state_achieved: []               # 已达成的 exit_state 条目
+
+interrupt_log: []                       # 本次自主运行期间的中断记录
+# 格式:
+# - chapter: 42
+#   type: "FATAL/ADAPTIVE"
+#   reason: "中断原因描述"
+#   resolved: true/false

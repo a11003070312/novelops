@@ -1,0 +1,40 @@
+# ============================================================
+# 爽点节奏追踪 - 防止连续铺垫过长导致读者流失
+# 番茄平台核心：每5章内必须有至少一个爽点
+# 每章 Phase 5 更新
+# ============================================================
+
+# 爽点类型（根据你的题材自定义）
+# payoff_types:
+#   打脸   - 被低估后的反击
+#   升级   - 修为/能力突破
+#   逆袭   - 劣势反转
+#   装逼   - 低调展现超出预期的实力
+#   揭秘   - 重要伏笔兑现
+#   其他   - 自定义类型
+
+chapters_since_last_payoff: 0
+
+last_payoff:
+  chapter: 0
+  type: ""
+  description: ""
+  intensity: 0          # 1-5，5最强
+
+recent_payoffs: []
+# 格式:
+# - chapter: 1
+#   type: "打脸"
+#   description: "描述"
+#   intensity: 3
+
+payoff_distribution: {}  # 各类型爽点出现次数统计
+
+next_planned_payoff:
+  chapter: null
+  type: ""
+  description: ""
+
+# 警告阈值
+warn_threshold: 5        # 超过N章无爽点触发 WARN
+fail_threshold: 7        # 超过N章无爽点触发 FAIL（不得写作）

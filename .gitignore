@@ -1,0 +1,49 @@
+# ============================================================
+# NovelOps - .gitignore
+# ============================================================
+
+# API 密钥（绝不提交）
+.env
+.env.local
+
+# 向量数据库（体积大，本地生成）
+.vector-db/
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+*.pyo
+scripts/__pycache__/
+
+# LanceDB 数据
+*.lance/
+
+# CocoIndex
+.cocoindex_code/
+
+# Obsidian
+.obsidian/
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# 草稿（定稿后自动删除）
+state/draft-ch*.md
+state/creative-prompt.md
+
+# 章节阶段报告（内容已压缩进对话，可选择不提交）
+# state/phase-reports/
+# 如果希望保留报告历史，注释掉上面一行

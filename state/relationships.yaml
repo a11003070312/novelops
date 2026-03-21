@@ -1,0 +1,14 @@
+# ============================================================
+# 人物关系网 - 当前状态快照
+# 每章 Phase 5 更新（关系发生变化时）
+# ============================================================
+
+relationships: []
+# 格式（双向：A->B 和 B->A 都需要记录）:
+# - from: "char-001"
+#   to: "char-002"
+#   type: "师徒"              # 关系类型
+#   description: "具体关系描述，包含当前状态"
+#   established_chapter: 1
+#   status: "active"          # active/strained/broken/ended
+#   last_updated_chapter: 1

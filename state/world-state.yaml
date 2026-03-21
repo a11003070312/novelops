@@ -1,0 +1,31 @@
+# ============================================================
+# 世界势力格局 - 当前状态快照
+# 发生重大变化时更新（势力更迭、战争开始/结束、重大事件）
+# ============================================================
+
+last_updated_chapter: 0
+
+# 势力当前状态
+factions: []
+# 格式:
+# - name: "势力名称"
+#   status: "active"          # active/weakened/destroyed
+#   leader: "当前领导人"
+#   power_ranking: 1          # 当前实力排名
+#   notes: "当前状态说明"
+
+# 重大事件记录
+major_events: []
+# 格式:
+# - chapter: 1
+#   event: "事件描述"
+#   impact: "对格局的影响"
+
+# 进行中的冲突
+ongoing_conflicts: []
+# 格式:
+# - name: "冲突名称"
+#   parties: ["势力A", "势力B"]
+#   started_chapter: 1
+#   status: "ongoing"         # ongoing/resolved/frozen
+#   current_situation: "当前态势"

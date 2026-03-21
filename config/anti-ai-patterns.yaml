@@ -1,0 +1,560 @@
+# ============================================================
+# 去AI感规则 - 番茄小说通用
+# 本文件适用于所有番茄小说项目，可根据具体作品微调
+#
+# 本文件同时服务于两个消费者：
+#   1. LLM 写作时参照（人可读的 note 字段）
+#   2. scripts/scan-text.py 自动扫描（机器可解析字段）
+#
+# severity 级别:
+#   critical -- 绝对禁用，出现即 FAIL
+#   high     -- 强烈建议禁用，单章超过 max_occurrences 即 FAIL
+#   medium   -- 建议少用，超过阈值为 WARN
+#
+# context_exceptions 可选值:
+#   dialogue  -- 角色对话引号内豁免
+#   flashback -- 闪回场景豁免
+#   quote     -- 引用原文豁免
+# ============================================================
+
+# ============================================================
+# 一、词汇层 - AI 高频词禁用清单
+# ============================================================
+banned_words:
+
+  # ---- AI 垃圾词（绝对禁用，任何模型都会滥用）----
+
+  - word: "映入眼帘"
+    severity: "critical"
+    max_occurrences: 0
+    context_exceptions: []
+    replacements: []
+    note: "直接写看到什么"
+
+  - word: "眸"
+    severity: "critical"
+    max_occurrences: 0
+    context_exceptions: []
+    replacements: ["眼睛"]
+    note: "用‘眼睛’或具体描写"
+
+  - word: "低眸"
+    severity: "critical"
+    max_occurrences: 0
+    context_exceptions: []
+    replacements: ["低头", "垂下眼睛"]
+    note: "禁用"
+
+  - word: "星眸"
+    severity: "critical"
+    max_occurrences: 0
+    context_exceptions: []
+    replacements: []
+    note: "禁用，用具体描写替代"
+
+  - word: "轻启薄唇"
+    severity: "critical"
+    max_occurrences: 0
+    context_exceptions: []
+    replacements: []
+    note: "禁用，直接写说话"
+
+  - word: "墨发"
+    severity: "critical"
+    max_occurrences: 0
+    context_exceptions: []
+    replacements: ["黑头发"]
+    note: "禁用"
+
+  - word: "嘴角微扬"
+    severity: "critical"
+    max_occurrences: 0
+    context_exceptions: []
+    replacements: ["笑了", "嘴角翘了翘"]
+    note: "禁用"
+
+  - word: "身姿"
+    severity: "critical"
+    max_occurrences: 0
+    context_exceptions: []
+    replacements: []
+    note: "禁用，用具体动作或体态描写"
+
+  - word: "眉眼"
+    severity: "critical"
+    max_occurrences: 0
+    context_exceptions: []
+    replacements: []
+    note: "禁用，分开写眉毛和眼睛的具体动作"
+
+  - word: "心弦"
+    severity: "critical"
+    max_occurrences: 0
+    context_exceptions: []
+    replacements: []
+    note: "禁用‘触动心弦’‘拨动心弦’等搭配"
+
+  - word: "目光落在"
+    severity: "critical"
+    max_occurrences: 0
+    context_exceptions: []
+    replacements: ["看向", "盯着", "瞥了一眼"]
+    note: "AI典型句式，换用日常动词"
+
+  - word: "情不自禁"
+    severity: "critical"
+    max_occurrences: 0
+    context_exceptions: []
+    replacements: []
+    note: "删除，直接写动作"
+
+# ============================================================
+# 二、句式模板 - AI 典型句式禁用
+#
+# regex 字段使用 Python re 正则语法
+# 通配符说明: .+ 匹配任意文字（至少一个字符）
+# 性别词: [他她] 匹配"他"或"她"
+# ============================================================
+banned_patterns:
+
+  - id: "bp-001"
+    description: "眼中闪过一丝X"
+    regex: "[他她]的眼中闪过一丝.+"
+    severity: "critical"
+    note: "用具体动作替代"
+
+  - id: "bp-002"
+    description: "空气仿佛凝固了"
+    regex: "空气仿佛凝固了"
+    severity: "critical"
+    note: "删除或用具体感受替代"
+
+  - id: "bp-003"
+    description: "时间仿佛静止了"
+    regex: "时间仿佛静止了"
+    severity: "critical"
+    note: "删除或用具体感受替代"
+
+  - id: "bp-004"
+    description: "一股X的气息扑面而来"
+    regex: "一股.+的气息扑面而来"
+    severity: "critical"
+    note: "用具体感官描写"
+
+  - id: "bp-005"
+    description: "他/她不知道的是"
+    regex: "[他她]不知道的是"
+    severity: "critical"
+    note: "禁止上帝视角提示"
+
+  - id: "bp-006"
+    description: "如果他/她知道X一定会X"
+    regex: "如果[他她]知道.+一定会.+"
+    severity: "critical"
+    note: "禁止上帝视角假设"
+
+  - id: "bp-007"
+    description: "这一刻，他/她终于明白了"
+    regex: "这一刻，[他她]终于明白了"
+    severity: "critical"
+    note: "用行为展示领悟"
+
+  - id: "bp-008"
+    description: "X的种子在心中种下"
+    regex: ".+的种子在心中种下"
+    severity: "critical"
+    note: "用具体行为表达"
+
+  - id: "bp-009"
+    description: "嘴角勾起一抹X的弧度"
+    regex: "[他她]的嘴角勾起一抹.+的弧度"
+    severity: "critical"
+    note: "用简单的动作描写"
+
+  - id: "bp-010"
+    description: "声音冷得像是从九幽地狱传来"
+    regex: "[他她]的声音冷得像是从九幽地狱传来"
+    severity: "critical"
+    note: "用具体的声音描写"
+
+  - id: "bp-011"
+    description: "整个X都安静了下来"
+    regex: "整个.+都安静了下来"
+    severity: "critical"
+    note: "用具体环境反应"
+
+  - id: "bp-012"
+    description: "所有人都愣住了"
+    regex: "所有人都愣住了"
+    severity: "critical"
+    note: "写具体的1-2个人的反应"
+
+  - id: "bp-013"
+    description: "眼中满是X"
+    regex: "[他她]的眼中满是.+"
+    severity: "critical"
+    note: "用行为展示情绪"
+
+  - id: "bp-014"
+    description: "一道身影X地出现"
+    regex: "一道身影.+地出现"
+    severity: "critical"
+    note: "直接写人物出场"
+
+  - id: "bp-015"
+    description: "空气中弥漫着X的气息"
+    regex: "空气中弥漫着.+的气息"
+    severity: "critical"
+    note: "用具体感官描写"
+
+  - id: "bp-016"
+    description: "心中涌起一股X"
+    regex: "[他她]的心中涌起一股.+"
+    severity: "critical"
+    note: "用行为展示情绪"
+
+  - id: "bp-017"
+    description: "仿佛一切都回到了X"
+    regex: "仿佛一切都回到了.+"
+    severity: "critical"
+    note: "删除或用具体记忆片段"
+
+  - id: "bp-018"
+    description: "这一切才刚刚开始"
+    regex: "[他她]知道[，,]这一切才刚刚开始"
+    severity: "critical"
+    note: "禁止此类章末套话"
+
+  - id: "bp-019"
+    description: "而这，仅仅只是一个开始"
+    regex: "而这[，,]仅仅只是一个开始"
+    severity: "critical"
+    note: "禁止此类章末套话"
+
+  - id: "bp-020"
+    description: "不是X，是Y对比句式（AI滥用）"
+    regex: "不是.{1,10}[，,]是.{1,15}[。]"
+    severity: "medium"
+    max_occurrences: 2
+    note: "此句式AI写作会大量重复（8次/章+），全章最多2次。实测验证：砍掉后文笔流畅度显著提升"
+
+# ============================================================
+# 三、结构层 - 打破 AI 的均匀节奏
+# ============================================================
+structural_rules:
+
+  paragraph_variation:
+    rule: "连续三段不能长度相近，必须长短交错"
+    check_method: "auto"
+    threshold_ratio: 0.3
+    note: "相邻段落字数差异低于30%视为'长度相近'，连续三段相近即 WARN"
+    example: "长段叙事(80字) -> 短句对话(10字) -> 中段描写(40字)"
+
+  paragraph_density:
+    rule: "段落不能过度碎片化，平均段落长度不能太低，单句段落不能占比过高"
+    check_method: "auto"
+    avg_length_min: 40
+    single_sentence_max_ratio: 0.55
+    consecutive_short_max: 5
+    consecutive_short_threshold: 15
+    severity: "high"
+    note: "平均段落长度<40字 WARN; 单句段落>55% WARN; 连续5段以上<=15字 WARN（节奏段豁免）"
+
+  inner_voice_density:
+    rule: "每500字至少要有一处内心声音介入（短句独白或自言自语），防止纯第三人称闷叙述"
+    check_method: "auto"
+    window_size: 500
+    severity: "high"
+    note: "短句独白 = 独立段落 <= 10字（如'得起来。''真行。'）；自言自语 = 引号对话 <= 15字（如'……算了。'）"
+
+  chapter_opening_ban:
+    check_scope: "first_paragraph"
+    patterns:
+      - id: "ob-001"
+        regex: "^阳光洒在.+"
+        severity: "critical"
+      - id: "ob-002"
+        regex: "^清晨[，,].+醒来"
+        severity: "critical"
+      - id: "ob-003"
+        regex: "^.+看着眼前的.+[，,]陷入了沉思"
+        severity: "critical"
+      - id: "ob-004"
+        regex: "^时间过得很快[，,]转眼.+"
+        severity: "critical"
+      - id: "ob-005"
+        regex: "^夜幕降临[，,].+"
+        severity: "critical"
+      - id: "ob-006"
+        regex: "^.+回到.+[，,]脑海中还在回想着.+"
+        severity: "critical"
+
+  transition_ban:
+    check_scope: "full_text"
+    words:
+      - word: "很快"
+        severity: "high"
+        max_occurrences: 0
+        context_exceptions: ["dialogue"]
+        note: "禁止偷懒转场"
+      - word: "不久后"
+        severity: "high"
+        max_occurrences: 0
+        context_exceptions: ["dialogue"]
+        note: "禁止偷懒转场"
+      - word: "时间飞逝"
+        severity: "critical"
+        max_occurrences: 0
+        context_exceptions: []
+        note: "禁止偷懒转场"
+    note: "用场景切换、对话衔接、动作连贯来过渡；时间跳跃必须有锚点"
+
+  ending_ban:
+    check_scope: "last_paragraph"
+    patterns:
+      - id: "eb-001"
+        regex: "而这一切[，,]才刚刚开始"
+        severity: "critical"
+      - id: "eb-002"
+        regex: "[他她]不知道[，,]一场.+正在悄然酝酿"
+        severity: "critical"
+      - id: "eb-003"
+        regex: "夜色中[，,]一双眼睛正注视着这一切"
+        severity: "critical"
+
+# ============================================================
+# 四、情感表达层
+# ============================================================
+emotion_rules:
+
+  show_dont_tell:
+    rule: "展示而非告知角色情绪"
+    check_method: "pattern"
+    tell_patterns:
+      - id: "em-001"
+        regex: "[他她]感到(非常|无比|十分|极其).{1,4}"
+        severity: "high"
+        note: "直接告知情绪"
+      - id: "em-002"
+        regex: "[他她](心中|内心)涌起一股.+"
+        severity: "high"
+        note: "直接告知情绪"
+      - id: "em-003"
+        regex: "[他她]此刻(无比|非常|十分).{1,4}"
+        severity: "high"
+        note: "直接告知情绪"
+    good_examples:
+      - "他一把掀翻桌子，碗碟碎了一地"
+      - "她张了张嘴，什么都没说出来，转身走了"
+      - "他来回踱了三圈，突然停下来，笑了"
+
+  emotion_complexity:
+    rule: "复杂场景中角色应有矛盾情绪，不要单一情绪直线拉满"
+    check_method: "manual"
+    examples:
+      - "打败仇人时：痛快，但也空虚"
+      - "救回朋友时：高兴，但也后怕"
+      - "获得力量时：兴奋，但也隐隐不安"
+
+  imperfection:
+    rule: "角色可以有不合时宜的反应"
+    check_method: "manual"
+    examples:
+      - "紧张时冷笑话"
+      - "悲伤时发呆说不出话"
+      - "获胜后没有豪言壮语，只是坐下来喘气"
+
+# ============================================================
+# 五、对话层
+# ============================================================
+dialog_rules:
+
+  differentiation:
+    rule: "每个角色必须有独特的语言标记"
+    check_method: "manual"
+    guidelines:
+      - "粗人角色：短句、粗话、不完整句子"
+      - "文人角色：成语、引经据典、长句"
+      - "年轻角色：网络用语、语气词多"
+      - "老练角色：废话少、直奔主题、偶尔意味深长"
+      - "紧张角色：说话断断续续、重复、自我打断"
+
+  realism:
+    - "对话允许打断、跑题、答非所问"
+    - "对话允许省略主语、用代词指代"
+    - "对话允许口头禅和重复用词"
+    - "禁止角色突然长篇大论解释设定"
+    - "禁止所有角色用相同句式说话"
+
+  exposition_dump:
+    check_method: "auto"
+    max_dialogue_length: 100
+    severity: "high"
+    note: "单条对话超过100字触发 WARN（可能是角色长篇大论解释设定）"
+
+  pacing:
+    - "废话也是真实感的一部分，不是每句话都要推进剧情"
+    - "重要信息可以藏在闲聊中自然带出"
+    - "沉默和停顿也是对话的一部分"
+
+# ============================================================
+# 六、叙事层
+# ============================================================
+narrative_rules:
+
+  selective_detail:
+    rule: "只描写有意义的细节，跳过常规动作"
+    check_method: "manual"
+    bad: "他站起身，走到门前，伸手推开门，走了出去"
+    good: "他摔门走了"
+
+  asymmetry:
+    rule: "允许叙事重心偏移，不是每个出场角色都要有戏份"
+    check_method: "manual"
+
+  author_quirks:
+    rule: "建立2-3个作者标志性手法并反复使用，以下为建议（可在新书启动时自定义）"
+    check_method: "manual"
+    suggestions:
+      - "喜欢用短句单独成段制造节奏感"
+      - "喜欢在紧张时刻插入主角的无厘头内心吐槽"
+      - "喜欢用环境描写暗示角色心境而不直说"
+      - "喜欢在章节结尾用一句简短的对话制造悬念"
+      - "喜欢用省略号表达欲言又止"
+
+# ============================================================
+# 七、翻译腔检测 - 英语语法结构渗透中文
+#
+# 中文是意合语言（靠语义推动逻辑），不是形合语言（靠连接词标记逻辑）。
+# AI 生成的中文常带英语语法痕迹：被动语态滥用、的字链、
+# 形合连接词堆砌、"当...时"句式。本类别检测并消灭这些痕迹。
+# ============================================================
+translation_tone_patterns:
+
+  # A. 被动语态滥用（中文天然用主动句）
+  passive_voice:
+    - id: "tt-001"
+      regex: "被[\\u4e00-\\u9fff]{1,4}(?:所|而|着)"
+      severity: "high"
+      max_occurrences: 1
+      context_exceptions: ["dialogue"]
+      note: "中文'被'传统暗示不幸。改为主动句或省略主语"
+      examples:
+        bad: "这个规则被所有人接受了"
+        good: "所有人都认了这条规则"
+
+  # B. 的字链（连续3个以上"的"修饰结构）
+  de_chain:
+    - id: "tt-002"
+      regex: "的[\\u4e00-\\u9fff]{1,8}的[\\u4e00-\\u9fff]{1,8}的"
+      severity: "medium"
+      max_occurrences: 2
+      context_exceptions: []
+      note: "英式定语从句习惯。拆成多句或删除多余修饰"
+      examples:
+        bad: "这是一个充满了浓郁的灵气的古老的山洞"
+        good: "山洞很老，灵气浓得化不开"
+
+  # C. 英语隐喻直译（语义层面，正则无法检测，由 LLM 写作时自检）
+  # 此段不供 scan-text.py 消费，仅作写作意识提醒
+  metaphor_calques:
+    note: |
+      翻译腔最隐蔽的形式：英语隐喻映射直接搬进中文。
+      字面上每个字都是中文，但比喻逻辑来自英语。
+      正则无法区分物理义和比喻义，必须靠写作时的语义自查。
+    examples:
+      - english_source: "crack / gap → vulnerability"
+        bad: "有规律就有缝。有缝就能杀。"
+        problem: "'缝'是物理概念（门缝、裂缝），中文不用它比喻'可利用的弱点'"
+        good: "有规律就有破绽。有破绽就能动手。"
+        chinese_alternatives: ["破绽", "空子", "漏洞", "可乘之机"]
+
+      - english_source: "window → opportunity"
+        bad: "这是一个很小的窗口"
+        problem: "'窗口'比喻机会是英文 window of opportunity 的直译"
+        good: "机会很短"
+        chinese_alternatives: ["时机", "机会", "空档"]
+
+      - english_source: "fuel → motivation/cause"
+        bad: "愤怒成了他修炼的燃料"
+        problem: "'燃料'比喻驱动力是英文 fuel 的直译"
+        good: "愤怒逼着他往前走"
+        chinese_alternatives: ["动力→直接写驱动行为", "改用中文意象：火、执念"]
+
+      - english_source: "map → plan"
+        bad: "他心里有了一张路线图"
+        problem: "'路线图'是英文 roadmap 的直译"
+        good: "他心里有数了"
+        chinese_alternatives: ["盘算", "计较", "有数"]
+
+    self_check_rule: |
+      写作时遇到比喻，问一个问题：
+      "一个从未接触过英语的古代中国人，会这样比喻吗？"
+      如果答案是否——换成中文认知里自然的意象。
+
+  # D. 形合连接词堆砌（论文腔、翻译腔标志词）
+  formal_connectors:
+    words:
+      - word: "然而"
+        severity: "medium"
+        max_occurrences: 1
+        context_exceptions: []
+        note: "中文用语义推动逻辑，不靠连接词。删除或用'但'替代"
+      - word: "此外"
+        severity: "high"
+        max_occurrences: 0
+        context_exceptions: []
+        note: "论文词，正文禁用"
+      - word: "因此"
+        severity: "medium"
+        max_occurrences: 1
+        context_exceptions: []
+        note: "少用，让读者自己推因果"
+      - word: "基于"
+        severity: "high"
+        max_occurrences: 0
+        context_exceptions: ["dialogue"]
+        note: "英式介词结构，正文禁用"
+      - word: "作为"
+        severity: "medium"
+        max_occurrences: 1
+        context_exceptions: ["dialogue"]
+        note: "英式介词结构，少用"
+      - word: "对于"
+        severity: "medium"
+        max_occurrences: 1
+        context_exceptions: ["dialogue"]
+        note: "英式介词结构，少用"
+      - word: "尽管"
+        severity: "medium"
+        max_occurrences: 1
+        context_exceptions: []
+        note: "书面连接词，少用，改用'虽然'或直接转折"
+
+  # E. "当...时"句式（英式时间从句结构）
+  temporal_dang:
+    - id: "tt-004"
+      regex: "当[\\u4e00-\\u9fff]{2,20}[时的]时候"
+      severity: "medium"
+      max_occurrences: 1
+      context_exceptions: []
+      note: "余光中批'五步一当十步一当'。改为直接叙述时间关系"
+      examples:
+        bad: "当他走到门口的时候，风停了"
+        good: "他走到门口。风停了"
+
+# ============================================================
+# 八、环境描写密度检测
+# ============================================================
+sensory_rules:
+  description: "环境描写密度检测 -- 防止章节缺乏场景感官描写"
+  sensory_keywords:
+    visual: ["光芒", "光线", "暗淡", "阴影", "影子", "雾气", "烟尘", "灰蒙", "青光", "碧绿", "金色", "银白", "漆黑", "昏暗", "明亮", "荧光"]
+    auditory: ["声响", "回响", "寂静", "嗡鸣", "回荡", "吼声", "啸声", "嘶鸣", "轰鸣", "簌簌", "呼啸"]
+    olfactory: ["气味", "气息", "腥味", "药味", "焦味", "霉味", "清香", "恶臭", "刺鼻", "芳香"]
+    tactile: ["冰冷", "滚烫", "湿润", "凉意", "粗糙", "光滑", "刺痛", "灼热", "温热", "寒意"]
+    ambient: ["寒风", "细雨", "闷热", "潮湿", "干燥", "暖意", "凉风", "山风", "阴冷"]
+  window_size: 800
+  min_per_window: 1
+  min_density_per_1000: 2
+  severity: "medium"

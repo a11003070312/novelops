@@ -1,0 +1,53 @@
+# ============================================================
+# 卷大纲模板 - 复制此文件为 arc-XXX.yaml 使用
+# 每卷开始前创建，写作中可小幅调整
+#
+# 字段标记:
+#   [REQUIRED] -- 必填，check-schema.py 会校验非空
+#   [OPTIONAL] -- 选填，留空不报错
+# ============================================================
+
+id: "arc-XXX"                            # [REQUIRED] 卷编号，格式 arc-NNN
+title: ""                                # [REQUIRED] 卷名
+chapter_range: [0, 0]                    # [REQUIRED] 起止章节号，[1] >= [0]
+status: "planned"                        # [REQUIRED] planned/in_progress/completed
+
+# 本卷核心目标（一句话概括这卷要完成什么）
+arc_goal: ""                             # [REQUIRED]
+
+# 本卷出场人物及其角色
+characters:                              # [REQUIRED] 至少1项
+  # - id: "char-001"
+  #   role_in_arc: "主视角，从废物到内门新星"
+  # - id: "char-002"
+  #   role_in_arc: "女主初登场，冷面学姐"
+  []
+
+# 本卷关键事件（按顺序排列）
+key_events:                              # [REQUIRED] 至少1项
+  # - chapter: 1
+  #   event: "事件描述"
+  #   purpose: "叙事目的（为什么安排这个事件）"
+  []
+
+# 本卷需要埋设的伏笔
+foreshadowing:                           # [OPTIONAL]
+  # - content: "伏笔内容描述"
+  #   target_reveal: "arc-005"           # 计划在哪一卷揭露
+  []
+
+# 本卷需要回收的伏笔
+payoffs:                                 # [OPTIONAL]
+  # - thread_id: "foreshadow-XXX"
+  #   description: "如何回收"
+  []
+
+# 本卷情绪曲线（用文字描述起伏节奏）
+emotional_arc: ""                        # [OPTIONAL]
+# 例："低开(被欺辱) -> 缓升(暗中变强) -> 高潮(公开打脸) -> 悬念(新线索)"
+
+# 本卷新增设定（如果引入了新的世界观元素）
+new_settings:                            # [OPTIONAL]
+  # - "新地点：天枢城"
+  # - "新组织：暗影阁"
+  []

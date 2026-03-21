@@ -1,0 +1,45 @@
+{
+  "permissions": {
+    "allow": ["Bash(*)", "Write(*)", "Edit(*)"]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'set -o pipefail; if echo \"$CLAUDE_FILE_PATH\" | grep -qE \"chapters[/\\\\\\\\].*\\.md$\"; then python scripts/scan-text.py \"$CLAUDE_FILE_PATH\" 2>&1 | tail -80; fi'",
+            "description": "Auto-scan chapter text after writing",
+            "timeout": 30000
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'set -o pipefail; if echo \"$CLAUDE_FILE_PATH\" | grep -qE \"(state|outline|characters|config|locations)[/\\\\\\\\].*\\.(yaml|md)$\"; then python scripts/check-schema.py \"$CLAUDE_FILE_PATH\" 2>&1 | tail -40; fi'",
+            "description": "Auto-validate YAML schema after writing state/outline/character/config/location files",
+            "timeout": 30000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'set -o pipefail; python scripts/check-consistency.py 2>&1 | tail -50'",
+            "description": "Run consistency check before session ends",
+            "timeout": 60000
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'set -o pipefail; python scripts/check-schema.py 2>&1 | tail -60'",
+            "description": "Run full schema validation before session ends",
+            "timeout": 60000
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+# ============================================================
+# 里程碑时间线 - 防止重复进阶
+# 每章 Phase 5 更新（发生里程碑事件时）
+# check-consistency.py 会校验：同角色同事件不能重复出现
+# ============================================================
+
+milestones: []
+# 格式:
+# - character: "char-001"
+#   type: "cultivation"    # cultivation/ability/item/knowledge/psychological
+#   event: "具体事件描述（例：突破筑基期）"
+#   chapter: 1
+#   note: "上下文说明（可选）"

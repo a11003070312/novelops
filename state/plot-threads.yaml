@@ -1,0 +1,33 @@
+# ============================================================
+# 伏笔追踪 - 管理所有伏笔的完整生命周期
+# 每章写完后更新（新埋/推进/回收）
+# ============================================================
+
+# 活跃线索（未解决的伏笔和悬念）
+active_threads: []
+# 格式:
+# - id: "thread-001"
+#   name: "伏笔名称"
+#   status: "active"
+#   planted_chapter: 1
+#   last_mentioned_chapter: 1
+#   mention_interval_target: 10    # 目标：每N章至少提及一次
+#   clues_revealed:
+#     - chapter: 1
+#       content: "本章揭示的线索内容"
+
+# 已回收的伏笔
+resolved_threads: []
+# 格式:
+# - id: "thread-001"
+#   name: "伏笔名称"
+#   planted_chapter: 1
+#   resolved_chapter: 50
+#   resolution: "如何回收的"
+
+# 已废弃的伏笔（剧情调整导致不再使用）
+abandoned_threads: []
+# 格式:
+# - id: "thread-001"
+#   name: "伏笔名称"
+#   reason: "废弃原因"

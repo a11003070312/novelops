@@ -1,0 +1,68 @@
+# 段落大纲模板
+# 段落是自主生产的最小调度单位，通常 3-7 章，10,000-20,000 字
+# [REQUIRED] 必填  [OPTIONAL] 可选
+
+# [REQUIRED] 段落 ID，格式 seg-{卷号}-{段落序号}，如 seg-001-02
+id: "seg-XXX-YY"
+
+# [REQUIRED] 所属卷 ID
+arc: "arc-XXX"
+
+# [REQUIRED] 段落标题（简短，便于人类定位）
+title: "[REQUIRED]"
+
+# [REQUIRED] 段落状态
+# planned / in_progress / completed
+status: "planned"
+
+# [REQUIRED] 入场状态（本段开始时各角色的快照）
+entry_state:
+  story_time: "[REQUIRED] 故事内时间，如'穿越后第47天'"
+  characters:
+    - char: "char-XXX"
+      location: "[REQUIRED] 所在地点"
+      cultivation: "[REQUIRED] 当前修为"
+      status_note: "[OPTIONAL] 特殊状态备注"
+
+# [REQUIRED] 出口状态（硬约束，agent必须让这些状态在段落结束时成真）
+# 用叙事语言描述，可以是：人物状态变化、伏笔推进程度、势力关系变化等
+# 最少 2 条，每条最少 10 字，不能填模板占位符
+exit_state:
+  - "[REQUIRED] 第一条出口状态，具体描述本段结束后的净变化"
+  - "[REQUIRED] 第二条出口状态，可以是伏笔推进、关系变化、势力格局等"
+
+# [REQUIRED] 段落情绪走向（一句话，描述读者的情绪体验弧线）
+narrative_arc: "[REQUIRED] 例：从被动承压到主动翻盘，读者从压抑到爽"
+
+# [REQUIRED] 主要事件序列（叙事语言，不是章节分镜）
+# 3-6 条，每条描述一个叙事节拍
+key_events:
+  - "[REQUIRED] 事件1"
+  - "[REQUIRED] 事件2"
+
+# [REQUIRED] 爽点类型（影响拆章策略的自适应判断）
+# 可选值：智斗 / 战斗 / 情感 / 揭秘 / 成长 / 日常
+highlight_type: "[REQUIRED]"
+
+# [REQUIRED] 预计章节数（agent拆章时的参考，可在实际执行中调整）
+estimated_chapters: 4
+
+# [OPTIONAL] 伏笔操作
+foreshadowing:
+  advance: []        # 本段要推进的伏笔 ID 列表
+  plant: []          # 本段要新埋的伏笔 ID 列表
+  resolve: []        # 本段要回收的伏笔 ID 列表
+
+# [OPTIONAL] 情感线操作
+emotion_threads:
+  accumulate: []     # 本段要积累的情感线 ID
+  payoff: []         # 本段要兑现的情感线 ID
+
+# [OPTIONAL] 人类与 agent 协作过程中的备注
+collaboration_notes: ""
+
+# [OPTIONAL] 实际执行后的章节列表（agent填写）
+chapters_produced: []
+
+# [OPTIONAL] 段落完成后的汇报摘要（agent填写）
+completion_report: ""

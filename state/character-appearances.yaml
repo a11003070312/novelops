@@ -1,0 +1,22 @@
+# ============================================================
+# 配角出场频率追踪 - 防止重要配角「消失」
+# 每章 Phase 5 更新（更新 last_appeared_chapter）
+# 警告规则：重要配角超过阈值章数未出场 = WARN
+# ============================================================
+
+# 重要度等级
+# tier: A = 核心配角（每卷必出场）
+#       B = 重要配角（每两卷出场）
+#       C = 功能性配角（按剧情需要）
+
+characters: []
+# 格式（新书启动时从 characters/ 档案初始化）:
+# - id: "char-001"
+#   name: "角色名"
+#   tier: A                    # A/B/C
+#   last_appeared_chapter: 0
+#   first_appeared_chapter: 0
+#   appearance_count: 0
+#   chapters_absent: 0
+#   warn_threshold: 15         # tier A 建议15，tier B 建议30
+#   notes: ""

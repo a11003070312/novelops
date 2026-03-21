@@ -1,0 +1,61 @@
+# ============================================================
+# 章节大纲模板 - 复制此文件为 chapter-XXXX.yaml 使用
+# 每章写前创建（由 Agent 自动生成草稿，人类审核）
+#
+# 字段标记:
+#   [REQUIRED] -- 必填，check-schema.py 会校验非空
+#   [OPTIONAL] -- 选填，留空不报错
+# ============================================================
+
+id: "chapter-XXXX"                       # [REQUIRED] 章节编号，格式 chapter-NNNN
+arc: "arc-XXX"                           # [REQUIRED] 所属卷，格式 arc-NNN
+title: ""                                # [REQUIRED] 章节标题
+status: "planned"                        # [REQUIRED] planned/draft/review/published
+
+# 场景信息
+scene: ""                                # [REQUIRED] 场景地点
+pov_character: ""                        # [OPTIONAL] 本章视角角色（通常是主角）
+time_in_story: ""                        # [OPTIONAL] 故事内时间
+
+# 章节开场（本章如何开始，与上一章如何衔接）
+opening_notes: ""                        # [OPTIONAL]
+# 例："考核结束次日清晨，陆沉收到核心区许可令牌，整理行装后前往"
+# 例："战斗结束后直接接续，主角还在擂台边缘"
+# 例："时间跳跃三个月，主角已在中域青石坊立足"
+
+# 出场人物（只列出本章出场的人物ID）
+characters_present:                      # [REQUIRED] 至少1项
+  # - "char-001"
+  # - "char-002"
+  []
+
+# 本章核心目标（Agent 必须在正文中完成的任务）
+objectives:                              # [REQUIRED] 至少1项
+  # - "主角与反派正面对决并获胜"
+  # - "展示主角隐藏的第二个战斗技能"
+  # - "女主对主角的态度发生变化"
+  []
+
+# 章末悬念/钩子（本章结尾必须设置的悬念）
+chapter_hook: ""                         # [REQUIRED]
+# 例："胜利后，秘境深处传来异响，地面出现古老纹路"
+
+# 节奏标注
+pacing_notes: ""                         # [OPTIONAL]
+# 例："前半段紧张对峙，中段激烈打斗，后段短暂喘息后新悬念"
+
+# 一致性约束（Agent 写作时必须遵守的硬约束）
+consistency_notes:                       # [OPTIONAL]
+  # - "主角此时是炼气三层，不能使用筑基以上的能力"
+  # - "反派的招式在第12章已有描述，保持一致"
+  # - "女主此时还不知道主角的玉佩秘密"
+  []
+
+# 伏笔操作（本章需要处理的伏笔）
+foreshadowing_actions:                   # [OPTIONAL]
+  # - action: "plant"                    # plant/advance/resolve
+  #   description: "埋设新伏笔：xxx"
+  # - action: "advance"
+  #   thread_id: "thread-001"
+  #   description: "推进线索：xxx"
+  []

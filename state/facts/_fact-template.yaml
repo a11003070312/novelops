@@ -1,0 +1,37 @@
+# ============================================================
+# 事实注册表模板 - 每章写完后自动生成
+# 文件命名: chapter-XXXX.yaml
+#
+# 字段标记:
+#   [REQUIRED] -- 必填，check-schema.py 会校验
+#   [OPTIONAL] -- 选填
+# ============================================================
+
+chapter: 0                               # [REQUIRED] 章节号
+total_facts: 0                           # [OPTIONAL] 本章事实总数
+
+# 事实分类说明:
+# appearance         - 外貌特征（发色、伤疤、身高、穿着习惯）
+# measurement        - 具体数字（距离、时间、数量、价格）
+# character_statement - 角色说过的重要话（承诺、威胁、信息）
+# world_rule         - 世界观规则（随口提到的设定细节）
+# event_detail       - 事件细节（非主线但可能被引用）
+# environment        - 场景环境（布局、方位、特征）
+# time_marker        - 时间标记（季节、天气、日期）
+# item_detail        - 物品描述（颜色、大小、材质、功能）
+# naming             - 新出现的名称（人名、地名、组织名、招式名）
+
+# permanence 说明:
+# permanent    - 永久有效（伤疤、地理距离、历史事件）
+# temporary    - 临时有效（当前住所、临时持有的物品）
+# conditional  - 条件有效（"只要不突破就..."）
+
+facts:
+  # - id: "fact-XXXX-01"               # [REQUIRED] 格式 fact-章节号-序号
+  #   category: "appearance"            # [REQUIRED] 见上方分类说明
+  #   content: "用一句话精确描述"         # [REQUIRED]
+  #   characters: ["char-001"]          # [REQUIRED] 涉及人物ID列表
+  #   tags: ["scar", "left_hand"]       # [REQUIRED] 3-5个英文检索标签
+  #   permanence: "permanent"           # [REQUIRED] permanent/temporary/conditional
+  #   valid_until: null                 # [OPTIONAL] temporary 类型失效时填写章节号
+  []

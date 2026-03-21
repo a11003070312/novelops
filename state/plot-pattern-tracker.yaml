@@ -1,0 +1,32 @@
+# ============================================================
+# 情节模式重复检测 + 章节开头类型追踪
+# 每章 Phase 5 更新
+# ============================================================
+
+# 冲突模式出现次数（防止同类型冲突重复使用）
+conflict_patterns: []
+# 格式:
+# - pattern: "冲突类型名（例：被人设圈套）"
+#   occurrences: []           # 出现过的章节号列表
+#   warn_threshold: 3         # 超过N次触发 WARN（本章须换新形式）
+#   last_used: 0
+
+# 情绪节拍出现次数
+emotional_beats: []
+# 格式:
+# - beat: "情绪节拍名（例：压抑蓄力）"
+#   occurrences: []
+#   last_used: 0
+
+# 最近章节开头类型记录
+recent_openings: []
+# 格式:
+# - chapter: 1
+#   type: "开头类型（例：战斗切入/对话切入/环境切入/内心独白切入）"
+#   description: "一句话描述开头内容"
+
+# 连续相同开头类型计数
+consecutive_same_type:
+  type: ""
+  count: 0
+  warn_threshold: 3         # 连续N章相同开头类型触发 WARN

@@ -1,0 +1,43 @@
+# ============================================================
+# 项目元信息 - 新书启动 Stage 1 填写
+# ============================================================
+
+# 基本信息
+title: ""                                    # [REQUIRED] 书名
+author: ""                                   # [OPTIONAL] 笔名
+platform: "番茄小说"                          # [OPTIONAL] 发布平台
+genre: ""                                    # [REQUIRED] 题材（玄幻/都市/末世/古言/等）
+sub_genre: ""                                # [OPTIONAL] 细分题材
+target_audience: ""                          # [REQUIRED] 男频/女频
+
+# 简介（番茄平台发布用）
+synopsis: |
+  [在此填写简介。
+  番茄小说简介建议：
+  - 前两行用极致冲突或反差吸引注意
+  - 展示主角金手指/特殊能力
+  - 结尾留悬念或情感钩子
+  - 控制在300字以内]
+
+# 封面生成提示词（可选，用于 AI 生成封面参考）
+cover_prompt: ""
+
+# 规模目标
+target_word_count: "200万字"                  # [OPTIONAL] 目标总字数
+target_chapters: 1000                        # [OPTIONAL] 预计总章数
+target_arcs: 6                               # [OPTIONAL] 预计总卷数
+chapter_word_count: [2000, 2500]             # [REQUIRED] 每章字数范围（番茄平台甜区）
+
+# 一句话卖点（用于保持全书方向一致）
+one_liner: ""
+
+# 核心吸引力（排序代表优先级）
+core_hooks:
+  - ""
+  - ""
+  - ""
+
+# 更新节奏
+update_schedule:
+  chapters_per_day: 2                        # 每日更新章数
+  words_per_day: 5000                        # 每日更新字数

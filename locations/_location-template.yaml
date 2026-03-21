@@ -1,0 +1,33 @@
+id: "loc-XXX"                              # [REQUIRED] Format: loc-001, loc-002...
+name: ""                                   # [REQUIRED] 地点名称
+region: ""                                 # [REQUIRED] 所属区域（东荒/中域/...）
+type: ""                                   # [REQUIRED] 类型枚举: 居住区/坊市/秘境/野外/地下/建筑/战场/其他
+parent_location: null                       # [OPTIONAL] 上级地点ID（如 loc-001 是陆家，loc-002 是陆家灵田）
+first_appearance: 0                         # [REQUIRED] 首次出场章节号
+
+# 感官锚点 -- 创作指令的核心素材
+# 用叙事语言写，像跟另一个作者描述"这地方长什么样"
+sensory_anchors:
+  visual: ""                               # [REQUIRED] 视觉：光线、色调、空间感
+  auditory: ""                             # [OPTIONAL] 听觉：环境声、回音、安静程度
+  olfactory: ""                            # [OPTIONAL] 嗅觉：气味特征
+  tactile: ""                              # [OPTIONAL] 触觉/体感：温度、湿度、风
+  atmosphere: ""                           # [REQUIRED] 氛围：这地方给人什么感觉
+
+# 空间特征
+spatial_features:                          # [OPTIONAL]
+  - ""                                     # 关键地标/物件（如"院中枯井""墙角药架"）
+
+# 叙事功能
+narrative_role: ""                         # [OPTIONAL] 这个地点在故事中的功能/象征
+
+# 随剧情演变记录（按章节追加）
+evolution:                                 # [OPTIONAL]
+  # - chapter: 1
+  #   change: "初始状态"
+  #   sensory_update:                      # 如感官锚点发生变化
+  #     visual: "新的视觉描述"
+  []
+
+# 关联章节（Phase 5 自动维护）
+appeared_in: []                            # [OPTIONAL] 出场章节号列表

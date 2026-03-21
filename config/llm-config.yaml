@@ -1,0 +1,30 @@
+# ============================================================
+# LLM 配置 -- Qwen API (DashScope)
+# 用于 Phase 2 章节写作，由 scripts/write-chapter.py 消费
+# ============================================================
+
+# API 端点（DashScope OpenAI 兼容接口）
+api_base: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+
+# 模型配置
+models:
+  primary: "qwen3.5-plus"
+  fallback: "qwen-max"
+
+# 每稿温度（骨架稿偏高鼓励创意，删减稿偏低保持克制，机审稿最低保持精确）
+temperatures:
+  skeleton: 0.8
+  sensory: 0.85
+  trimmed: 0.7
+  review: 0.3
+
+# 生成参数
+generation:
+  max_tokens: 8192
+  top_p: 0.9
+
+# 网络配置
+network:
+  timeout: 120
+  max_retries: 3
+  retry_base_delay: 2

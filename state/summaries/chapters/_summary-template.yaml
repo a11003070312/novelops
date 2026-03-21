@@ -1,0 +1,34 @@
+# ============================================================
+# 章节摘要模板 - 每章写完后生成
+# 文件命名: chapter-XXXX.yaml
+#
+# 字段标记:
+#   [REQUIRED] -- 必填
+#   [OPTIONAL] -- 选填
+# ============================================================
+
+chapter: 0                               # [REQUIRED] 章节号
+arc: "arc-XXX"                           # [REQUIRED] 所属卷
+
+story_time: ""                           # [REQUIRED] 故事内时间
+
+# 一句话概括
+one_liner: ""                            # [REQUIRED]
+
+# 关键事件列表
+events:                                  # [REQUIRED] 至少1项
+  # - "事件1"
+  # - "事件2"
+  []
+
+# 情绪走向
+emotional_note: ""                       # [REQUIRED]
+# 例："孤独但开始有希望，结尾玉佩发光带来期待感"
+
+# 出场人物
+characters_appeared: []                  # [REQUIRED] 人物ID列表，至少1项
+
+# 本章提及但未展开的信息（可能成为后续伏笔）
+dangling_info:                           # [OPTIONAL]
+  # - "隔壁床位的弟子深夜未归"
+  []

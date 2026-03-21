@@ -1,0 +1,27 @@
+# ============================================================
+# 情感线追踪 - 管理长线情感积累
+# 与 plot-threads.yaml 互补：
+#   plot-threads 追踪"读者要知道什么"
+#   emotion-threads 追踪"读者要感受什么"
+#
+# 每章 Phase 5 更新：本章在哪条情感线上积累了细节？
+# 警告规则：连续3章无任何情感线积累 = "空热量"警告
+# ============================================================
+
+emotion_threads: []
+# 格式:
+# - id: "emo-001"
+#   name: "情感线名称"
+#   type: "character_core"       # character_core/tragic_tension/thematic/wonder
+#   description: "这条情感线是什么，终极payoff是什么"
+#   seed_chapter: 1
+#   payoff_target: 100           # 预计在哪章达到payoff
+#   accumulation:
+#     - chapter: 1
+#       detail: "本章的积累细节"
+
+# ============================================================
+# 监控规则
+# ============================================================
+monitoring:
+  empty_calorie_warning_threshold: 3   # 连续N章无情感积累触发警告
