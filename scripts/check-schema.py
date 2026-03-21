@@ -613,14 +613,21 @@ def validate_relationships_yaml(data, result: FileResult):
             if not isinstance(rel, dict):
                 result.fail(f"{prefix} 必须是字典")
                 continue
-            if "from" not in rel:
-                result.fail(f"{prefix} 缺少必填字段: from")
-            elif not is_nonempty_string(rel["from"]):
-                result.fail(f"{prefix}.from 不能为空字符串")
-            if "to" not in rel:
-                result.fail(f"{prefix} 缺少必填字段: to")
-            elif not is_nonempty_string(rel["to"]):
-                result.fail(f"{prefix}.to 不能为空字符串")
+            # 支持两种字段名：from/to（模板默认）或 source/target（项目可选）
+            has_from = "from" in rel or "source" in rel
+            has_to = "to" in rel or "target" in rel
+            if not has_from:
+                result.fail(f"{prefix} 缺少必填字段: source (或 from)")
+            else:
+                val = rel.get("from") or rel.get("source")
+                if not is_nonempty_string(val):
+                    result.fail(f"{prefix}.source 不能为空字符串")
+            if not has_to:
+                result.fail(f"{prefix} 缺少必填字段: target (或 to)")
+            else:
+                val = rel.get("to") or rel.get("target")
+                if not is_nonempty_string(val):
+                    result.fail(f"{prefix}.target 不能为空字符串")
 
     if not result.has_fail and not result.has_warn:
         result.ok()

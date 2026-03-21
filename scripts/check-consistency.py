@@ -513,13 +513,16 @@ def check_relationship_target_existence(
     for rel in rels:
         if not isinstance(rel, dict):
             continue
-        from_id = rel.get("from")
-        to_id = rel.get("to")
+        # 支持两种字段名：from/to 或 source/target
+        from_id = rel.get("from") or rel.get("source")
+        to_id = rel.get("to") or rel.get("target")
+        from_name = rel.get("from_name") or rel.get("source_name", from_id)
+        to_name = rel.get("to_name") or rel.get("target_name", to_id)
 
         if from_id and from_id not in char_map:
-            issues.append(f"关系记录中 from={from_id} 不存在对应人物档案")
+            issues.append(f"关系记录中 from={from_id} ({from_name}) 不存在对应人物档案")
         if to_id and to_id not in char_map:
-            issues.append(f"关系记录中 to={to_id} 不存在对应人物档案")
+            issues.append(f"关系记录中 to={to_id} ({to_name}) 不存在对应人物档案")
 
     if issues:
         result.level = "FAIL"
