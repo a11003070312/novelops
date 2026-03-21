@@ -277,7 +277,7 @@ def check_banned_words(
         word = entry["word"]
         severity = entry.get("severity", "medium")
         max_occ = entry.get("max_occurrences", 0)
-        exceptions = entry.get("context_exceptions", [])
+        exceptions = entry.get("context_exceptions") or []
 
         total_count = count_in_text(text, word)
         if total_count == 0:
@@ -342,9 +342,12 @@ def check_banned_patterns(
             continue
 
         max_occ = entry.get("max_occurrences", 0)
-        # critical/high：任何匹配即 FAIL，max_occurrences 对这两个级别无效
-        if severity in ("critical", "high"):
+        # critical：任何匹配即 FAIL，忽略 max_occurrences
+        # high：超过阈值才 FAIL（阈值为 0 时任何匹配即 FAIL，与文档一致）
+        if severity == "critical":
             level = "FAIL"
+        elif severity == "high":
+            level = "FAIL" if (max_occ == 0 or len(hits) > max_occ) else "WARN"
         elif severity == "medium" and max_occ > 0 and len(hits) > max_occ:
             level = "WARN"
         elif severity == "medium" and max_occ == 0:
@@ -649,7 +652,7 @@ def check_transition_ban(
         word = entry["word"]
         severity = entry.get("severity", "medium")
         max_occ = entry.get("max_occurrences", 0)
-        exceptions = entry.get("context_exceptions", [])
+        exceptions = entry.get("context_exceptions") or []
 
         total_count = count_in_text(text, word)
         if total_count == 0:
@@ -729,7 +732,7 @@ def check_glossary(
 
     for entry in glossary_terms:
         correct = entry.get("correct", "")
-        wrong_list = entry.get("wrong", [])
+        wrong_list = entry.get("wrong") or []
         note = entry.get("note", "")
 
         for wrong_word in wrong_list:
@@ -948,7 +951,7 @@ def check_translation_tone(
         regex_str = entry.get("regex", "")
         severity = entry.get("severity", "high")
         max_occ = entry.get("max_occurrences", 1)
-        exceptions = entry.get("context_exceptions", [])
+        exceptions = entry.get("context_exceptions") or []
 
         try:
             pattern = re.compile(regex_str)
@@ -1022,7 +1025,7 @@ def check_translation_tone(
         word = entry.get("word", "")
         severity = entry.get("severity", "medium")
         max_occ = entry.get("max_occurrences", 1)
-        exceptions = entry.get("context_exceptions", [])
+        exceptions = entry.get("context_exceptions") or []
 
         total_count = count_in_text(text, word)
         if total_count == 0:

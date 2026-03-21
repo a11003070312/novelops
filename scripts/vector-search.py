@@ -99,11 +99,22 @@ TOP_K_DEFAULT = 5
 
 # 索引范围：相对于项目根目录的路径
 INDEX_DIRS = [
+    # 角色与场景
+    ("characters", "*.md"),
+    ("locations", "*.yaml"),
+    # 大纲
+    ("outline/chapters", "*.yaml"),
+    ("outline/arcs", "*.yaml"),
+    ("outline/segments", "*.yaml"),
+    # 状态记忆
     ("state/facts", "*.yaml"),
     ("state/summaries/chapters", "*.yaml"),
     ("state/summaries/arcs", "*.md"),
-    ("characters", "*.md"),
-    ("outline/chapters", "*.yaml"),
+    ("state", "plot-threads.yaml"),
+    ("state", "relationships.yaml"),
+    ("state", "timeline.yaml"),
+    ("state", "emotion-threads.yaml"),
+    # 配置与正文
     ("config", "*.yaml"),
     ("chapters", "*.md"),
 ]
