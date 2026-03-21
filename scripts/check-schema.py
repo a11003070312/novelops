@@ -589,6 +589,31 @@ def validate_plot_pattern_tracker_yaml(data, result: FileResult):
         result.ok()
 
 
+def validate_relationships_yaml(data, result: FileResult):
+    """Validate state/relationships.yaml."""
+    if not isinstance(data, dict):
+        result.fail("文件内容不是有效的 YAML 字典")
+        return
+
+    if "relationships" in data and isinstance(data["relationships"], list):
+        for idx, rel in enumerate(data["relationships"]):
+            prefix = f"relationships[{idx}]"
+            if not isinstance(rel, dict):
+                result.fail(f"{prefix} 必须是字典")
+                continue
+            if "from" not in rel:
+                result.fail(f"{prefix} 缺少必填字段: from")
+            elif not is_nonempty_string(rel["from"]):
+                result.fail(f"{prefix}.from 不能为空字符串")
+            if "to" not in rel:
+                result.fail(f"{prefix} 缺少必填字段: to")
+            elif not is_nonempty_string(rel["to"]):
+                result.fail(f"{prefix}.to 不能为空字符串")
+
+    if not result.has_fail and not result.has_warn:
+        result.ok()
+
+
 def validate_facts_yaml(data, result: FileResult):
     """Validate state/facts/chapter-*.yaml."""
     if not isinstance(data, dict):
@@ -1124,8 +1149,9 @@ def detect_and_validate(filepath: Path, root: Path) -> FileResult:
         validate_arc_summary_md(data, result)
     elif rel_posix == "state/plot-pattern-tracker.yaml":
         validate_plot_pattern_tracker_yaml(data, result)
+    elif rel_posix == "state/relationships.yaml":
+        validate_relationships_yaml(data, result)
     elif rel_posix in (
-        "state/relationships.yaml",
         "state/timeline.yaml",
         "state/world-state.yaml",
         "state/milestones.yaml",

@@ -1032,7 +1032,7 @@ def call_qwen_api(
     api_key = load_api_key()
     api_base = llm_config.get("api_base", "https://dashscope.aliyuncs.com/compatible-mode/v1")
     models = llm_config.get("models", {})
-    model = model_override or models.get("primary", "qwen3.5-plus")
+    model = model_override or models.get("primary", "qwen3-plus")
     fallback_model = models.get("fallback", "qwen-max")
 
     temps = llm_config.get("temperatures", {})
