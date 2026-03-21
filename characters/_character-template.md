@@ -11,7 +11,7 @@
 id: "char-XXX"                           # [REQUIRED] 唯一标识（如 char-001）
 name: ""                                 # [REQUIRED] 角色名
 aliases: []                              # [OPTIONAL] 别称/外号
-role: ""                                 # [REQUIRED] protagonist/heroine/villain/supporting/minor
+role: ""                                 # [REQUIRED] protagonist/heroine/villain/antagonist/supporting/minor/neutral
 status: "alive"                          # [REQUIRED] alive/dead/missing/unknown
 first_appearance: 0                      # [REQUIRED] 首次登场章节号
 

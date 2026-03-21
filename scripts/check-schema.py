@@ -492,6 +492,10 @@ def validate_plot_threads_yaml(data, result: FileResult):
                 result.fail(f"{prefix} 缺少必填字段: id")
             elif not is_nonempty_string(thread["id"]):
                 result.fail(f"{prefix}.id 不能为空字符串")
+            if "name" not in thread:
+                result.fail(f"{prefix} 缺少必填字段: name")
+            elif not is_nonempty_string(thread["name"]):
+                result.fail(f"{prefix}.name 不能为空字符串")
             if "planted_chapter" not in thread:
                 result.fail(f"{prefix} 缺少必填字段: planted_chapter")
             elif not isinstance(thread["planted_chapter"], int):
@@ -508,6 +512,10 @@ def validate_plot_threads_yaml(data, result: FileResult):
                 result.fail(f"{prefix} 缺少必填字段: id")
             elif not is_nonempty_string(thread["id"]):
                 result.fail(f"{prefix}.id 不能为空字符串")
+            if "name" not in thread:
+                result.fail(f"{prefix} 缺少必填字段: name")
+            elif not is_nonempty_string(thread["name"]):
+                result.fail(f"{prefix}.name 不能为空字符串")
             if "resolved_chapter" not in thread:
                 result.fail(f"{prefix} 缺少必填字段: resolved_chapter")
             elif not isinstance(thread["resolved_chapter"], int):
@@ -524,6 +532,10 @@ def validate_plot_threads_yaml(data, result: FileResult):
                 result.fail(f"{prefix} 缺少必填字段: id")
             elif not is_nonempty_string(thread["id"]):
                 result.fail(f"{prefix}.id 不能为空字符串")
+            if "name" not in thread:
+                result.fail(f"{prefix} 缺少必填字段: name")
+            elif not is_nonempty_string(thread["name"]):
+                result.fail(f"{prefix}.name 不能为空字符串")
             if "abandoned_chapter" not in thread:
                 result.fail(f"{prefix} 缺少必填字段: abandoned_chapter")
             elif not isinstance(thread["abandoned_chapter"], int):

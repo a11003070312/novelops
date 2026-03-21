@@ -30,4 +30,5 @@ abandoned_threads: []
 # 格式:
 # - id: "thread-001"
 #   name: "伏笔名称"
+#   abandoned_chapter: 50             # [REQUIRED] 废弃决定发生的章节号
 #   reason: "废弃原因"

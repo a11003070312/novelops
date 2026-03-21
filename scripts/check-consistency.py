@@ -475,7 +475,9 @@ def check_plot_thread_timeline(
             )
 
     if issues:
-        result.level = "WARN"
+        # 跨列表重复 ID 是数据完整性错误，升级为 FAIL
+        has_dup = any("同时出现在" in msg for msg in issues)
+        result.level = "FAIL" if has_dup else "WARN"
         result.messages = issues
     else:
         total = len(active) + len(resolved) + len(abandoned)
