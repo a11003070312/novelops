@@ -80,7 +80,6 @@ python scripts/vector-search.py --rebuild  # 重建索引（Phase 5 结束时）
 
 - Claude Code（claude.ai/code）
 - Python 3.8+
-- API Key（可选，用于 Qwen 备用写作通道）
 
 ### 安装
 
@@ -96,10 +95,6 @@ pip install -r scripts/requirements.txt
 pip install -r scripts/requirements-vector.txt
 # 首次运行 vector-search.py 时会自动下载 bge-base-zh-v1.5 模型（约400MB），之后自动缓存
 # 如不需要向量检索，跳过此步骤，仅使用 search-facts.py 的关键词检索即可
-
-# 配置 API Key（可选，Qwen 备用通道）
-cp .env.example .env
-# 编辑 .env，填入 DASHSCOPE_API_KEY
 ```
 
 ### 每次对话的启动方式（重要）
@@ -259,16 +254,6 @@ scan-text.py 的输出必须原文贴入报告，不能只声明"已检查"。ch
 不是强制的，但强烈建议在超过30章后使用。前30章用 `search-facts.py` 的关键词检索已经足够。后期事实积累多了，向量语义检索能找到关键词检索漏掉的隐式关联。
 
 首次使用需要下载模型（bge-base-zh-v1.5，约400MB），之后自动缓存。
-
-**Q: 备用写作通道（Qwen API）怎么用？**
-
-```bash
-# 1. 在 .env 配置 DASHSCOPE_API_KEY
-# 2. 手动生成 state/writing-context.json（字段说明见 write-chapter.py 顶部注释）
-python scripts/write-chapter.py --chapter N --draft skeleton --context-file state/writing-context.json
-```
-
-注意：此脚本需要 `state/writing-context.json`（结构化 JSON），与 ENTRY.md Phase 2.0 生成的 `state/creative-prompt.md`（自由文本）不兼容。备用通道的 JSON 格式说明见 `scripts/write-chapter.py` 顶部 BACKUP CHANNEL NOTE。这是在 Claude 子代理输出不满意时的备选方案，不是默认流程。
 
 ---
 

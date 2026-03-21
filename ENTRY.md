@@ -817,14 +817,6 @@ chapters/arc-XXX/chapter-XXXX.md
 
 删除 `state/draft-ch{章节号}.md`（定稿已写入正式路径，草稿不再需要）。同步将 `session-state.yaml` 的 `phase_artifacts.initial_draft` 置为 null。
 
-**备用通道: Qwen API（可选）**
-
-如果子代理输出质量不满意，可以切换到 Qwen API 通道：
-```bash
-python scripts/write-chapter.py --chapter N --draft skeleton --context-file state/writing-context.json
-```
-使用 Qwen 通道时，需要先将创作指令转换为 context JSON（Phase 2.0 的逆操作）。write-chapter.py 保留不删除，作为备用。
-
 ---
 
 ### Phase 3: 写后自检

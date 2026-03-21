@@ -143,12 +143,6 @@ The creative prompt contains: role definition + narrative plot summary + charact
 - Any quantity limits ("max X occurrences", "at least X times")
 - Hard constraint lists with 5+ items
 
-### Backup Channel: Qwen API (Optional)
-```bash
-python scripts/write-chapter.py --chapter N --draft skeleton --context-file state/writing-context.json
-```
-Requires `DASHSCOPE_API_KEY` in `.env`.
-
 ## Model Routing
 
 - Main session: **Sonnet** (always)
