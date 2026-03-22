@@ -612,17 +612,17 @@ def check_sentence_burstiness(text: str) -> list[Finding]:
 
     # 使用变异系数（CV = STD/mean），与句子平均长度无关
     # 校准数据：诛仙原文 CV≈0.57，本框架优质章节 CV≈0.57-0.62
-    # CV < 0.35 → 句式极度均匀（AI典型特征）→ WARN
-    # CV < 0.45 → 句式偏单调 → WARN（较宽松）
+    # CV < 0.35 → 句式极度均匀（AI典型特征）→ FAIL
+    # CV < 0.45 → 句式偏单调 → WARN
     cv = std / mean if mean > 0 else 0
     cv_fail_threshold = 0.35    # 极度均匀
     cv_warn_threshold = 0.45    # 偏单调
 
     if cv < cv_fail_threshold:
         findings.append(Finding(
-            "WARN", "句式多样性",
+            "FAIL", "句式多样性",
             f"句子长度变异系数极低: CV={cv:.2f} (阈值>{cv_warn_threshold}), "
-            f"STD={std:.1f}, 均={mean:.0f}字, 共{n}句 — 句式高度单调，AI痕迹强"
+            f"STD={std:.1f}, 均={mean:.0f}字, 共{n}句 — 句式高度单调，AI痕迹强，必须修改"
         ))
     elif cv < cv_warn_threshold:
         findings.append(Finding(

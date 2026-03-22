@@ -158,7 +158,7 @@ next_session:
 读取 session-state.yaml 后，向人类发出以下提问：
 
 ```
-当前模式: [监督模式 / 自主段落模式]
+当前模式: [监督模式 / 自主段落模式]（autonomous_mode 字段缺失时默认为监督模式）
 
 本次会话使用哪种模式？
   监督模式 — 每章逐步确认，适合精雕细琢
@@ -379,12 +379,15 @@ python scripts/check-schema.py outline/segments/seg-XXX-YY.yaml
 后续的"强制加载"和"条件加载"均以注册表为依据，不以 ENTRY.md 正文为准。
 > 如果注册表与 ENTRY.md 正文有出入，以注册表为准。
 
-**强制加载（注册表 mandatory 类型，每章必读）：**
+**强制加载 config（注册表 mandatory 类型，每章必读）：**
+- config/project.yaml
 - config/writing-style.yaml
 - config/novel-identity.yaml
 - config/anti-ai-patterns.yaml
 - config/writing-rules.yaml
 - config/prose-reference.yaml
+
+**强制加载大纲（每章必读，非注册表管理）：**
 - outline/arcs/{当前卷}.yaml
 - outline/chapters/{当前章}.yaml
 
@@ -613,6 +616,8 @@ python scripts/check-schema.py outline/chapters/{当前章}.yaml
 
 **本阶段目的：在动笔之前确认创作方向，避免成稿后大改。**
 
+**阶段专用文件加载：** 从 `config/_config-registry.yaml` 的 `phase_specific` 分类中，加载 `load_phase` 为 "1.5" 的文件（如 battle-design.yaml）。
+
 **1) 场景情绪板（每章必做，子代理生成）**
 
 情绪板必须在纯中文子代理环境中生成。原因：主会话的英文系统提示会污染中文输出，导致情绪板带分析框架语言和翻译腔。情绪板是 creative-prompt.md 的上游素材，如果这里不干净，下游全脏。
@@ -742,7 +747,7 @@ python scripts/check-schema.py outline/chapters/{当前章}.yaml
 - 创作层控制在500-800字。上下文层视章节复杂度而定，简单章节可以很短甚至省略（如第1章），复杂章节（多线交汇、伏笔密集）可以长一些，但也尽量精简
 - 第1章、独立性强的章节：只需要创作层，不需要上下文层
 - 多角色交汇、伏笔密集的章节：创作层 + 上下文层
-- **章节衔接检查（强制）：** 读取上一章摘要（state/summaries/chapters/chapter-{N-1}.yaml）的 events 最后一条，与本章大纲的 opening_notes 或 scene 对比。如有时间/空间/逻辑跳跃（如上章结尾在擂台，本章开场在地底），必须在创作指令的"这一章写什么"开头补充过渡说明（如"考核次日清晨，陆沉收到许可令牌，前往核心区入口"）。过渡说明用叙事语言，不超过3句话
+- **章节衔接检查（强制）：** 读取上一章摘要（state/summaries/chapters/chapter-{N-1}.yaml）的 events 最后一条，与本章大纲的 opening_notes 或 scene 对比。如有时间/空间/逻辑跳跃（如上章结尾在擂台，本章开场在地底），必须在创作指令的"这一章写什么"开头补充过渡说明（如"考核次日清晨，陆沉收到许可令牌，前往核心区入口"）。过渡说明用叙事语言，不超过3句话。**第1章或无前章摘要时跳过衔接检查**
 
 **为什么这样分：** 实测验证，190行规则的创作指令产出的文笔远不如极简指令。但长篇小说需要一致性——故事上下文是"让作者知情"，不是"让作者守规矩"，不会压制创造力。关键是用叙事语言写，不用结构化格式。
 
@@ -803,7 +808,7 @@ Agent(
 - 有 WARN → 在 Phase 2.2 定稿时一并修复
 - 有 FAIL → 在 Phase 2.2 定稿前先修复 FAIL 项，必要时触发**自适应中断**
 
-**Phase 2.1.5: 初稿事实核验（Claude 主会话执行）**
+**Phase 2.1.4: 初稿事实核验（Claude 主会话执行）**
 
 Claude 对初稿全文执行以下核验流程：
 
@@ -845,7 +850,7 @@ python scripts/vector-search.py "断言的完整描述"
 PASS: X项 | WARN: X项 | FAIL: X项
 ```
 
-**监督模式：** Claude 运行完 Phase 2.1.5 后，将初稿全文 + 核验报告一并展示给人类：
+**监督模式：** Claude 运行完 Phase 2.1.4 后，将初稿全文 + 核验报告一并展示给人类：
 - 全部 PASS -> 附在初稿后提交确认
 - 有 WARN -> 列出警告，提交人类判断
 - 有 FAIL -> 列出矛盾，要求人类决策：修改初稿 or 修改设定
@@ -893,7 +898,7 @@ chapters/arc-XXX/chapter-XXXX.md
 进入 Phase 3 自检...
 ```
 
-删除 `state/draft-ch{章节号}.md`（定稿已写入正式路径，草稿不再需要）。同步将 `session-state.yaml` 的 `phase_artifacts.initial_draft` 置为 null。
+删除 `state/draft-ch{章节号}.md`（定稿已写入正式路径，草稿不再需要）和 `state/creative-prompt.md`（创作指令已使用完毕）。同步将 `session-state.yaml` 的 `phase_artifacts.initial_draft` 和 `phase_artifacts.creative_prompt` 置为 null。
 
 ---
 
@@ -907,8 +912,8 @@ python scripts/scan-text.py chapters/arc-XXX/chapter-XXXX.md
 
 scan-text.py 现在包含 **L) 句式多样性（Burstiness）检测**：
 - CV（变异系数）≥ 0.45 → PASS
-- CV < 0.45 → WARN（句式偏单调）
-- CV < 0.35 → WARN（句式高度单调，AI痕迹强）
+- 0.35 ≤ CV < 0.45 → WARN（句式偏单调，建议修改）
+- CV < 0.35 → FAIL（句式高度单调，AI痕迹强，必须修改后重新扫描）
 - 校准基准：诛仙原文 CV≈0.57，本框架优质章节 CV≈0.57-0.62
 
 将脚本输出原文粘贴到自检报告中。这是不可跳过的硬性门控。
@@ -1162,7 +1167,7 @@ exit_state 达成:
 
 人类可能:
 - "通过" / "可以" -> 继续 Phase 6.4.5 后续步骤（更新 seg 文件，输出段落完成通知）
-- 指定某章修改意见 -> 修改对应章节正文（Phase 2.2 级别的小改），重新运行 scan-text.py，同步更新对应章节的 Phase 5 状态（如有变更），再回到 4.6.3
+- 指定某章修改意见 -> 修改对应章节正文（Phase 2.2 级别的小改），重新运行 scan-text.py，同步更新对应章节的 Phase 5 状态（如有变更，须运行 check-consistency.py + check-schema.py 确认状态一致性），再回到 4.6.3
 - 修改某章标题 -> 更新章节文件标题行和 chapter outline 的 title 字段
 - "重写第XX章" -> 回到该章 Phase 2 重新生成，完成后重新执行该章 Phase 3/5，再回到 4.6.3
 
@@ -1365,6 +1370,8 @@ python scripts/check-consistency.py
 python scripts/vector-search.py --rebuild
 ```
 
+**自主模式优化：** 连续写多章时每章都全量重建索引开销较大。如果 vector-search.py 支持增量更新，优先使用增量模式；否则仍每章执行 `--rebuild`（正确性优先于性能）。
+
 **5.10 向人类报告全部变更（强制格式）**
 
 将完整 Phase 5 报告写入 `state/phase-reports/phase5-ch{章节号}.md`，不在对话中展开全文。
@@ -1443,8 +1450,8 @@ last_session:
   incomplete_phase: null
   phase_artifacts:           # 清空本章产物路径（已归档）
     phase1_report: "state/phase-reports/phase1-chXXXX.md"
-    creative_prompt: "state/creative-prompt.md"
-    initial_draft: null      # 定稿后已删除
+    creative_prompt: null    # Phase 2.2 定稿后已删除
+    initial_draft: null      # Phase 2.2 定稿后已删除
     phase3_report: "state/phase-reports/phase3-chXXXX.md"
     phase5_report: "state/phase-reports/phase5-chXXXX.md"
 next_session:
@@ -1480,7 +1487,9 @@ interrupt_log:
 
 **6.4.5 自主模式：段落完成验证 + 触发段落审核**
 
-如果 `autonomous_mode: true`，在本章是当前段落最后一章时执行：
+如果 `autonomous_mode: true`，在本章是当前段落最后一章时执行。
+
+**段落末章判定标准：** 当 `chapter_completed_in_segment >= total_chapters_in_segment` 时视为段落末章。如果 exit_state 尚未全部达成但已达到预估章数，由 4.6.5 第 2) 步处理（追加章节或调整目标）。
 
 **1) 验证 exit_state 达成情况**
 
@@ -1647,7 +1656,8 @@ python scripts/check-schema.py
 4. 检查 temporary 事实是否需要标记过期
 5. 检查活跃伏笔是否有超过 30 章未推进的
 6. 检查长期未出场的角色
-7. 输出审计报告:
+7. 清理过期的 phase-reports：归档或删除当前章号 50 章之前的 `state/phase-reports/phase*-ch*.md` 文件（保留最近 50 章的报告供回溯）
+8. 输出审计报告:
 
 ```
 ## 全局审计报告
@@ -1667,7 +1677,7 @@ python scripts/check-schema.py
 - ...
 ```
 
-8. 人类审核处理后，更新 session-state.yaml 回到写作流程
+9. 人类审核处理后，更新 session-state.yaml 回到写作流程
 
 ---
 
@@ -1752,7 +1762,7 @@ python scripts/check-schema.py
 1. **先读 session-state.yaml，再做任何事**
 2. **先检查再写作，先写作再更新**
 3. **所有状态变更必须写入文件，不能只存在于对话中**
-4. **每章必须按顺序跑完全部 Phase（Phase 1-6）**，不得跳过或乱序。自主模式下单会话连续写多章时，每章各自完成完整 Phase 流程后再开始下一章
+4. **每章必须按顺序跑完全部 Phase（Phase 1-6）**，不得跳过或乱序（自主模式下 Phase 4 由 Section 4.6 段落审核替代，不视为跳过）。自主模式下单会话连续写多章时，每章各自完成完整 Phase 流程后再开始下一章
 5. **发现事实冲突时停下来报告人类，不自行编造解释**
 6. **严格遵循 anti-ai-patterns.yaml 的禁忌清单**
 7. **伏笔揭露时机以 plot-threads.yaml 为准，不可擅自提前**
@@ -1808,7 +1818,7 @@ config/ 目录已存在但 session-state.yaml 不存在时执行。
 2. 确认 outline/arcs/ 至少有第一卷
 3. 确认 characters/ 至少有主角
 4. 初始化所有 state/ 文件（逐一创建）：
-   - state/session-state.yaml（参考 state/_session-state-template.yaml）
+   - state/session-state.yaml（以 state/_session-state-template.yaml 为模板创建，填写初始值）
    - state/plot-threads.yaml（空的 active/resolved/abandoned 列表）
    - state/emotion-threads.yaml（空的 threads 列表，Phase 1 和 Phase 5.2 必读/必写）
    - state/milestones.yaml（空的 milestones 列表，Phase 5.6.5 必写）

@@ -105,10 +105,6 @@ script_only:
     description: "术语表（scan-text.py 自动使用，校验错别字和术语一致性）"
     used_by: "scripts/scan-text.py"
 
-  - file: "config/llm-config.yaml"
-    description: "Qwen API 模型配置（备用写作通道 write-chapter.py 使用）"
-    used_by: "scripts/write-chapter.py"
-
   - file: "config/style-samples.yaml"
     description: "文笔样本库（Phase 2.2 定稿时按需参考）"
     used_by: "Phase 2.2 定稿（按需手动参考，非自动加载）"
