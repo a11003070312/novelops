@@ -391,7 +391,7 @@ python scripts/check-schema.py outline/segments/seg-XXX-YY.yaml
 **出场人物（每章必读）：**
 - 从章节大纲 characters_present 获取人物ID
 - 读取 characters/{每个人物}.md
-- 读取角色档案后，检查是否有 `spec_file` 类指针字段（如 `life_bound_treasure.spec_file`），若存在且已激活则加载对应规格文件
+- 读取角色档案后，检查 `life_bound_treasure.status` 字段；若该字段存在且值不为"未炼制"，读取对应 `spec_file` 字段并加载规格文件
 
 **出场场景（每章必读）：**
 - 从章节大纲 scene 字段提取场景名称
@@ -460,17 +460,10 @@ python scripts/vector-search.py "关于[实体]的历史描述和设定"
 
 > 注册表是条件加载的唯一依据。如需新增触发规则，修改 `config/_config-registry.yaml`，不修改此处。
 
-初始框架已注册的条件文件（以注册表为准，项目启动后按需扩充）：
-
-| 文件 | 触发关键词（任意命中即加载） |
-|------|--------------------------|
-| config/world-settings.yaml | 新地点 / 势力 / 世界规则引用 |
-| config/battle-design.yaml | Phase 1.5 判断本章含重要战斗 |
+条件文件完整列表见 `config/_config-registry.yaml` conditional、phase_specific、character_linked 分类。
 
 **跨卷事件加载：**
 - 涉及跨卷事件 -> state/summaries/arcs/ 对应卷摘要
-
-条件加载说明：见上方表格，以 config/_config-registry.yaml 为权威依据。
 
 **2) 写前检查**
 
@@ -1943,9 +1936,35 @@ python scripts/check-schema.py config/_config-registry.yaml
 
 两个文件均通过后，新文件正式纳入流水线。
 
+### 弃用/停用 config 文件的操作步骤
+
+当某个 config 文件不再需要时：
+
+1. 在注册表中将该条目移至 `deprecated` 分类，保留记录供查阅
+2. 在 `logs/changelog.md` 中记录弃用原因和时间
+3. 不删除实际文件，保留在 config/ 目录中作为历史存档
+
+```yaml
+# 示例：在注册表中标记弃用
+deprecated:
+  - file: "config/弃用文件.yaml"
+    description: "原始描述"
+    deprecated_at_chapter: 章节号
+    reason: "弃用原因"
+```
+
+### check-schema.py 对注册表的校验说明
+
+当前 `check-schema.py` 对 `_config-registry.yaml` 仅做 YAML 语法校验（能解析即 PASS），**不校验**结构完整性和文件存在性。
+
+Step 4 运行 check-schema.py 只是语法保底，**结构完整性需人工检查**：
+- 每个 conditional 条目必须有 `file` + `description` + `triggers`（非空）
+- 每个 character_linked 条目必须有 `linked_character` + `condition` + `trigger_field_in_character`
+- `planned` 以外的条目，`file` 路径对应的文件必须已存在于磁盘
+
 ### 注册表维护规则
 
-- `config/_config-registry.yaml` 是唯一权威来源，ENTRY.md 正文中的条件加载描述仅为摘要，以注册表为准
+- `config/_config-registry.yaml` 是唯一权威来源，ENTRY.md 正文不再维护条件加载摘要表
 - 修改现有文件的触发条件时，只改注册表，不改 ENTRY.md
 - 注册表中的 `planned` 分类用于预登记尚未创建的文件，正式创建后移至对应分类
 - 每次新卷开始前，检查注册表 `planned` 分类，将已到期的计划文件创建并移入正式分类

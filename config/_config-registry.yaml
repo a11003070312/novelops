@@ -5,18 +5,24 @@
 # 添加新 config 文件时，必须先在此注册，再创建文件。
 # Phase 1 Step 0 读取本文件，依据 triggers 字段决定是否加载。
 #
-# 使用说明：
+# 加载类型说明：
 #   - mandatory：每章必读，无条件加载
-#   - conditional：满足 triggers 中任意一条则加载
+#   - conditional：满足 triggers 中任意一条则在 Phase 1 加载
+#   - phase_specific：非 Phase 1 加载，在指定 Phase 触发（见 load_phase 字段）
 #   - character_linked：特定角色出场且满足状态条件时加载
 #   - script_only：由脚本自动处理，Phase 1 不加载
 #   - planned：规划中但尚未创建的文件，先在此预登记
+#   - deprecated：已弃用，Phase 1 跳过，保留记录
 # ============================================================
 
 # ============================================================
 # 一、强制加载（每章必读，无论章节内容）
 # ============================================================
 mandatory:
+  - file: "config/project.yaml"
+    description: "项目元信息（书名、类型、目标字数、核心卖点 core_hooks）"
+    note: "Session 启动时已读取用于路由判断，Phase 1 仍须加载以确认 chapter_word_count 等写作约束"
+
   - file: "config/writing-style.yaml"
     description: "写作技法（叙事视角、句式风格、语言特征）"
 
@@ -33,7 +39,7 @@ mandatory:
     description: "两稿制流程 + 文笔锚点 + 场景情绪板模板"
 
 # ============================================================
-# 二、条件加载（满足 triggers 中任意一条即加载）
+# 二、条件加载（满足 triggers 中任意一条即在 Phase 1 加载）
 # ============================================================
 # triggers 的判断来源：章节大纲的 scene / characters_present /
 # objectives / foreshadowing_actions / consistency_notes 字段。
@@ -47,12 +53,6 @@ conditional:
       - "章节大纲 objectives 涉及势力/组织/阵营互动"
       - "章节大纲 consistency_notes 引用世界规则"
       - "章节大纲出现新的地名或势力名称"
-
-  - file: "config/battle-design.yaml"
-    description: "战斗设计工作坊（五步设计法）"
-    triggers:
-      - "Phase 1.5 判断本章含重要战斗（见 battle-design.yaml trigger_criteria）"
-    note: "本文件不在 Phase 1 加载，仅在 Phase 1.5 战斗工作坊启动时加载"
 
   # -------------------------------------------------------
   # 项目启动后，根据具体世界观补充以下类型的条目：
@@ -68,7 +68,21 @@ conditional:
   # -------------------------------------------------------
 
 # ============================================================
-# 三、角色关联加载（出场特定角色 + 满足状态条件时加载）
+# 三、阶段专用加载（非 Phase 1 加载，仅在指定 Phase 触发）
+# ============================================================
+phase_specific:
+
+  - file: "config/battle-design.yaml"
+    description: "战斗设计工作坊（五步设计法）"
+    load_phase: "1.5"
+    triggers:
+      - "Phase 1.5 判断本章含重要战斗（见 battle-design.yaml trigger_criteria）"
+
+# ============================================================
+# 四、角色关联加载（出场特定角色 + 满足状态条件时加载）
+# ============================================================
+# 判断字段统一使用角色档案中的状态字段，不依赖 cultivation_level，
+# 避免两个字段不同步时产生加载分歧。
 # ============================================================
 character_linked:
 
@@ -78,11 +92,12 @@ character_linked:
   # - file: "config/角色专属规格.yaml"
   #   description: "XXX 角色的本命法宝/专属能力规格"
   #   linked_character: "char-XXX"
-  #   condition: "char-XXX 的 cultivation_level 含'金丹'或更高境界"
-  #   trigger_field_in_character: "life_bound_treasure.spec_file"
+  #   condition: "char-XXX 的 life_bound_treasure.status 不为 '未炼制'"
+  #   trigger_field_in_character: "life_bound_treasure.status"
+  #   note: "激活后将 status 更新为当前成长阶段名，Phase 1 自动触发加载"
 
 # ============================================================
-# 四、脚本专用（由脚本自动读取，Phase 1 不加载）
+# 五、脚本专用（由脚本自动读取，Phase 1 不加载）
 # ============================================================
 script_only:
 
@@ -99,9 +114,15 @@ script_only:
     used_by: "Phase 2.2 定稿（按需手动参考，非自动加载）"
 
 # ============================================================
-# 五、待注册（规划中，尚未创建的文件）
-# ============================================================
-# 在此预留位置，规划但未创建的文件先在此登记意图，
-# 创建后移至对应分类并补全 triggers。
+# 六、待注册（规划中，尚未创建的文件）
 # ============================================================
 planned: []
+
+# ============================================================
+# 七、已弃用（不再使用，Phase 1 跳过，保留记录）
+# ============================================================
+# deprecated:
+#   - file: "config/弃用文件.yaml"
+#     description: "原始描述"
+#     deprecated_at_chapter: 章节号
+#     reason: "弃用原因"
