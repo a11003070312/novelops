@@ -1126,8 +1126,12 @@ def validate_config_registry(data, result: FileResult, root: Path):
     CHECK_EXISTENCE = {"mandatory", "conditional", "phase_specific", "character_linked", "script_only"}
     # Categories where entries are informational only (files may not exist yet)
     SKIP_EXISTENCE = {"planned", "deprecated"}
+    ALL_KNOWN = CHECK_EXISTENCE | SKIP_EXISTENCE
 
-    total_issues = 0
+    # M-4: warn on unknown top-level keys
+    for key in data:
+        if key not in ALL_KNOWN:
+            result.warn(f"未知的注册表分类 '{key}'，该分类下的条目不会被校验")
 
     for category in list(CHECK_EXISTENCE) + list(SKIP_EXISTENCE):
         entries = data.get(category)
@@ -1135,13 +1139,11 @@ def validate_config_registry(data, result: FileResult, root: Path):
             continue  # Optional category, absence is fine
         if not isinstance(entries, list):
             result.fail(f"{category}: 值应为列表，当前类型为 {type(entries).__name__}")
-            total_issues += 1
             continue
 
         for i, entry in enumerate(entries):
             if not isinstance(entry, dict):
                 result.fail(f"{category}[{i}]: 条目应为字典，当前类型为 {type(entry).__name__}")
-                total_issues += 1
                 continue
 
             file_val = entry.get("file", "")
@@ -1150,10 +1152,8 @@ def validate_config_registry(data, result: FileResult, root: Path):
             # All entries must have 'file' and 'description'
             if not is_nonempty_string(file_val):
                 result.fail(f"{category}[{i}]: 缺少必填字段 'file'")
-                total_issues += 1
             if not is_nonempty_string(entry.get("description")):
                 result.fail(f"{category} '{label}': 缺少必填字段 'description'")
-                total_issues += 1
 
             # Category-specific required fields
             if category == "conditional":
@@ -1163,16 +1163,13 @@ def validate_config_registry(data, result: FileResult, root: Path):
                         f"conditional '{label}': 'triggers' 字段缺失或为空列表"
                         "（条件加载必须至少有一条触发规则）"
                     )
-                    total_issues += 1
 
             elif category == "phase_specific":
                 if not is_nonempty_string(entry.get("load_phase")):
                     result.fail(f"phase_specific '{label}': 缺少必填字段 'load_phase'")
-                    total_issues += 1
                 triggers = entry.get("triggers")
                 if not isinstance(triggers, list) or len(triggers) == 0:
                     result.fail(f"phase_specific '{label}': 'triggers' 字段缺失或为空列表")
-                    total_issues += 1
 
             elif category == "character_linked":
                 for required_field in ("linked_character", "condition", "trigger_field_in_character"):
@@ -1180,16 +1177,20 @@ def validate_config_registry(data, result: FileResult, root: Path):
                         result.fail(
                             f"character_linked '{label}': 缺少必填字段 '{required_field}'"
                         )
-                        total_issues += 1
+
+            elif category == "script_only":
+                # H-2: used_by documents which script consumes this file
+                if not is_nonempty_string(entry.get("used_by")):
+                    result.warn(f"script_only '{label}': 建议填写 'used_by' 字段（说明哪个脚本读取此文件）")
 
             # H-3: file existence check (skip for planned / deprecated)
             if category not in SKIP_EXISTENCE and is_nonempty_string(file_val):
                 target = root / file_val
                 if not target.exists():
                     result.fail(f"{category} '{file_val}': 注册的文件在磁盘上不存在")
-                    total_issues += 1
 
-    if total_issues == 0:
+    # L-2: use result state instead of manual counter
+    if not result.has_fail and not result.has_warn:
         result.ok("注册表结构完整，所有注册文件均已存在于磁盘")
 
 
@@ -1369,10 +1370,12 @@ def discover_files(root: Path) -> list[Path]:
         files.append(p)
 
     # config YAML files (parse validation)
+    # Exclude project.yaml (has dedicated validator added above) and
+    # _config-registry.yaml (has dedicated validator added above).
     config_dir = root / "config"
     if config_dir.is_dir():
         for f in sorted(config_dir.glob("*.yaml")):
-            if not should_skip(f) and f.name != "project.yaml":
+            if not should_skip(f) and f.name not in ("project.yaml", "_config-registry.yaml"):
                 files.append(f)
 
     # characters/*.md (excluding templates)
