@@ -372,29 +372,38 @@ python scripts/check-schema.py outline/segments/seg-XXX-YY.yaml
 
 **1) 加载文件（Context Pack）**
 
-必读文件:
+**Step 0：读取 Config 注册表（强制，最先执行）**
+
+读取 `config/_config-registry.yaml`。
+本文件是所有 config 文件的唯一权威注册表，包含每个文件的加载类型和触发条件。
+后续的"强制加载"和"条件加载"均以注册表为依据，不以 ENTRY.md 正文为准。
+> 如果注册表与 ENTRY.md 正文有出入，以注册表为准。
+
+**强制加载（注册表 mandatory 类型，每章必读）：**
 - config/writing-style.yaml
 - config/novel-identity.yaml
 - config/anti-ai-patterns.yaml
 - config/writing-rules.yaml
+- config/prose-reference.yaml
 - outline/arcs/{当前卷}.yaml
 - outline/chapters/{当前章}.yaml
 
-出场人物:
+**出场人物（每章必读）：**
 - 从章节大纲 characters_present 获取人物ID
 - 读取 characters/{每个人物}.md
+- 读取角色档案后，检查是否有 `spec_file` 类指针字段（如 `life_bound_treasure.spec_file`），若存在且已激活则加载对应规格文件
 
-出场场景:
+**出场场景（每章必读）：**
 - 从章节大纲 scene 字段提取场景名称
 - 读取 locations/ 中对应的场景档案
 - 如场景有 evolution 记录，取最新状态的 sensory_anchors
 - 如场景是新地点（locations/ 中不存在）-> 标记"需要在 Phase 5 新建场景档案"
 
-近期记忆:
+**近期记忆（每章必读）：**
 - state/summaries/chapters/ 最近3章摘要
-- logs/[[changelog]].md 最近3条
+- logs/changelog.md 最近3条
 
-剧情线索:
+**剧情与情感线索（每章必读）：**
 - state/plot-threads.yaml（只读 active_threads）
 
 情感线索:
@@ -444,12 +453,24 @@ python scripts/vector-search.py "关于[实体]的历史描述和设定"
 
 **Step 4: 合并约束清单** -- 将两个通道的结果去重合并，标记为"历史事实约束——正文不得与之矛盾"
 
-条件加载:
-- 涉及新地点 -> config/world-settings.yaml 对应部分
-- 涉及力量升级 -> 力量体系部分
+**条件加载（注册表 conditional 和 character_linked 类型）：**
+
+对照章节大纲的 scene / characters_present / objectives / foreshadowing_actions / consistency_notes 字段，
+逐条检查注册表中每个文件的 triggers 列表，满足任意一条则加载对应文件。
+
+> 注册表是条件加载的唯一依据。如需新增触发规则，修改 `config/_config-registry.yaml`，不修改此处。
+
+初始框架已注册的条件文件（以注册表为准，项目启动后按需扩充）：
+
+| 文件 | 触发关键词（任意命中即加载） |
+|------|--------------------------|
+| config/world-settings.yaml | 新地点 / 势力 / 世界规则引用 |
+| config/battle-design.yaml | Phase 1.5 判断本章含重要战斗 |
+
+**跨卷事件加载：**
 - 涉及跨卷事件 -> state/summaries/arcs/ 对应卷摘要
-- 涉及重要战斗 -> config/battle-design.yaml（启动战斗设计工作坊）
-- 每章必读 -> config/prose-reference.yaml（两稿制流程和文笔锚点）
+
+条件加载说明：见上方表格，以 config/_config-registry.yaml 为权威依据。
 
 **2) 写前检查**
 
@@ -1859,3 +1880,72 @@ Schema 校验: (粘贴 check-schema.py 输出)
 
 审核第一章大纲后，即可开始写作。
 ```
+
+---
+
+## 附录C：Config 文件管理 SOP
+
+### 何时需要新增 config 文件
+
+以下情况需要新增 config 文件（而非追加到现有文件）：
+- 新卷开始，有大量新增世界设定（如进入新地域、新势力体系）
+- 新增角色的本命法宝或专属武器规格
+- 新增独立子系统（如特殊秘境的独立规则、特定功法的详细展开）
+
+以下情况**不需要**新增 config 文件，直接追加到现有文件：
+- 现有文件中某个设定的细化
+- 新卷新角色的道痕规格（追加到对应系统文件）
+- 新地点（追加到 world-settings.yaml 对应区域段落）
+
+### 新增 config 文件的操作步骤（必须按顺序执行）
+
+**Step 1：在注册表中登记（先登记，再创建文件）**
+
+打开 `config/_config-registry.yaml`，在对应分类下添加条目：
+
+```yaml
+# 条件加载文件：
+- file: "config/新文件名.yaml"
+  description: "一句话说明这个文件是什么"
+  triggers:
+    - "触发条件1（对照章节大纲字段描述）"
+    - "触发条件2"
+
+# 角色关联文件：
+- file: "config/新文件名.yaml"
+  description: "一句话说明"
+  linked_character: "char-XXX"
+  condition: "角色境界/状态条件"
+  trigger_field_in_character: "角色档案中指向本文件的字段路径"
+```
+
+**Step 2：如果是角色关联文件，在角色档案中添加指针**
+
+在对应角色的 `characters/{角色}.md` YAML frontmatter 中，添加指向新文件的字段：
+
+```yaml
+# 示例：角色本命法宝规格文件
+life_bound_treasure:
+  status: "未炼制"   # 或已激活的阶段名
+  spec_file: "config/新文件名.yaml"
+```
+
+**Step 3：创建 config 文件**
+
+按设定内容创建 `config/新文件名.yaml`，确保 YAML 结构合法。
+
+**Step 4：运行校验**
+
+```bash
+python scripts/check-schema.py config/新文件名.yaml
+python scripts/check-schema.py config/_config-registry.yaml
+```
+
+两个文件均通过后，新文件正式纳入流水线。
+
+### 注册表维护规则
+
+- `config/_config-registry.yaml` 是唯一权威来源，ENTRY.md 正文中的条件加载描述仅为摘要，以注册表为准
+- 修改现有文件的触发条件时，只改注册表，不改 ENTRY.md
+- 注册表中的 `planned` 分类用于预登记尚未创建的文件，正式创建后移至对应分类
+- 每次新卷开始前，检查注册表 `planned` 分类，将已到期的计划文件创建并移入正式分类

@@ -1,0 +1,107 @@
+# ============================================================
+# Config 文件注册表（唯一权威来源）
+# ============================================================
+# 所有 config/ 文件必须在此注册，才能在 Phase 1 被正确加载。
+# 添加新 config 文件时，必须先在此注册，再创建文件。
+# Phase 1 Step 0 读取本文件，依据 triggers 字段决定是否加载。
+#
+# 使用说明：
+#   - mandatory：每章必读，无条件加载
+#   - conditional：满足 triggers 中任意一条则加载
+#   - character_linked：特定角色出场且满足状态条件时加载
+#   - script_only：由脚本自动处理，Phase 1 不加载
+#   - planned：规划中但尚未创建的文件，先在此预登记
+# ============================================================
+
+# ============================================================
+# 一、强制加载（每章必读，无论章节内容）
+# ============================================================
+mandatory:
+  - file: "config/writing-style.yaml"
+    description: "写作技法（叙事视角、句式风格、语言特征）"
+
+  - file: "config/novel-identity.yaml"
+    description: "小说灵魂（整体调性、场景风格、情绪节奏）"
+
+  - file: "config/anti-ai-patterns.yaml"
+    description: "去AI感规则（禁用词、禁用句式、结构禁忌）"
+
+  - file: "config/writing-rules.yaml"
+    description: "平台节奏规则（开篇、卡文、更新周期）"
+
+  - file: "config/prose-reference.yaml"
+    description: "两稿制流程 + 文笔锚点 + 场景情绪板模板"
+
+# ============================================================
+# 二、条件加载（满足 triggers 中任意一条即加载）
+# ============================================================
+# triggers 的判断来源：章节大纲的 scene / characters_present /
+# objectives / foreshadowing_actions / consistency_notes 字段。
+# ============================================================
+conditional:
+
+  - file: "config/world-settings.yaml"
+    description: "世界观设定（力量体系、地理、势力、组织、世界规则）"
+    triggers:
+      - "章节大纲 scene 涉及新地点或跨域移动"
+      - "章节大纲 objectives 涉及势力/组织/阵营互动"
+      - "章节大纲 consistency_notes 引用世界规则"
+      - "章节大纲出现新的地名或势力名称"
+
+  - file: "config/battle-design.yaml"
+    description: "战斗设计工作坊（五步设计法）"
+    triggers:
+      - "Phase 1.5 判断本章含重要战斗（见 battle-design.yaml trigger_criteria）"
+    note: "本文件不在 Phase 1 加载，仅在 Phase 1.5 战斗工作坊启动时加载"
+
+  # -------------------------------------------------------
+  # 项目启动后，根据具体世界观补充以下类型的条目：
+  #
+  # - 修炼/战斗体系文件（如 cultivation-system.yaml）
+  #   triggers: 涉及境界突破/器物/战斗机制
+  #
+  # - 道痕/能力规格文件（如 power-system.yaml）
+  #   triggers: 角色使用/分析道痕的场景
+  #
+  # - 地域详细设定文件（如 eastern-waste.yaml）
+  #   triggers: 场景在对应地域
+  # -------------------------------------------------------
+
+# ============================================================
+# 三、角色关联加载（出场特定角色 + 满足状态条件时加载）
+# ============================================================
+character_linked:
+
+  # 项目启动后，为拥有本命法宝或专属规格文件的角色在此注册。
+  # 示例：
+  #
+  # - file: "config/角色专属规格.yaml"
+  #   description: "XXX 角色的本命法宝/专属能力规格"
+  #   linked_character: "char-XXX"
+  #   condition: "char-XXX 的 cultivation_level 含'金丹'或更高境界"
+  #   trigger_field_in_character: "life_bound_treasure.spec_file"
+
+# ============================================================
+# 四、脚本专用（由脚本自动读取，Phase 1 不加载）
+# ============================================================
+script_only:
+
+  - file: "config/glossary.yaml"
+    description: "术语表（scan-text.py 自动使用，校验错别字和术语一致性）"
+    used_by: "scripts/scan-text.py"
+
+  - file: "config/llm-config.yaml"
+    description: "Qwen API 模型配置（备用写作通道 write-chapter.py 使用）"
+    used_by: "scripts/write-chapter.py"
+
+  - file: "config/style-samples.yaml"
+    description: "文笔样本库（Phase 2.2 定稿时按需参考）"
+    used_by: "Phase 2.2 定稿（按需手动参考，非自动加载）"
+
+# ============================================================
+# 五、待注册（规划中，尚未创建的文件）
+# ============================================================
+# 在此预留位置，规划但未创建的文件先在此登记意图，
+# 创建后移至对应分类并补全 triggers。
+# ============================================================
+planned: []
