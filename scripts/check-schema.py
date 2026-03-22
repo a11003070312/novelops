@@ -613,7 +613,7 @@ def validate_relationships_yaml(data, result: FileResult):
             if not isinstance(rel, dict):
                 result.fail(f"{prefix} 必须是字典")
                 continue
-            # 支持两种字段名：from/to（模板默认）或 source/target（项目可选）
+            # 支持两种字段名：from/to（novelops 模板）或 source/target（本项目）
             has_from = "from" in rel or "source" in rel
             has_to = "to" in rel or "target" in rel
             if not has_from:
@@ -1112,12 +1112,99 @@ def validate_yaml_parseable(data, result: FileResult):
     result.ok("YAML 结构有效")
 
 
+def validate_config_registry(data, result: FileResult, root: Path):
+    """Validate config/_config-registry.yaml structure and registered file existence.
+
+    H-2: structural completeness (required fields per category)
+    H-3: file existence for all non-planned/deprecated entries
+    """
+    if not isinstance(data, dict):
+        result.fail("文件内容不是有效的 YAML 字典")
+        return
+
+    # Categories where file existence is checked
+    CHECK_EXISTENCE = {"mandatory", "conditional", "phase_specific", "character_linked", "script_only"}
+    # Categories where entries are informational only (files may not exist yet)
+    SKIP_EXISTENCE = {"planned", "deprecated"}
+
+    total_issues = 0
+
+    for category in list(CHECK_EXISTENCE) + list(SKIP_EXISTENCE):
+        entries = data.get(category)
+        if entries is None:
+            continue  # Optional category, absence is fine
+        if not isinstance(entries, list):
+            result.fail(f"{category}: 值应为列表，当前类型为 {type(entries).__name__}")
+            total_issues += 1
+            continue
+
+        for i, entry in enumerate(entries):
+            if not isinstance(entry, dict):
+                result.fail(f"{category}[{i}]: 条目应为字典，当前类型为 {type(entry).__name__}")
+                total_issues += 1
+                continue
+
+            file_val = entry.get("file", "")
+            label = file_val or f"[index {i}]"
+
+            # All entries must have 'file' and 'description'
+            if not is_nonempty_string(file_val):
+                result.fail(f"{category}[{i}]: 缺少必填字段 'file'")
+                total_issues += 1
+            if not is_nonempty_string(entry.get("description")):
+                result.fail(f"{category} '{label}': 缺少必填字段 'description'")
+                total_issues += 1
+
+            # Category-specific required fields
+            if category == "conditional":
+                triggers = entry.get("triggers")
+                if not isinstance(triggers, list) or len(triggers) == 0:
+                    result.fail(
+                        f"conditional '{label}': 'triggers' 字段缺失或为空列表"
+                        "（条件加载必须至少有一条触发规则）"
+                    )
+                    total_issues += 1
+
+            elif category == "phase_specific":
+                if not is_nonempty_string(entry.get("load_phase")):
+                    result.fail(f"phase_specific '{label}': 缺少必填字段 'load_phase'")
+                    total_issues += 1
+                triggers = entry.get("triggers")
+                if not isinstance(triggers, list) or len(triggers) == 0:
+                    result.fail(f"phase_specific '{label}': 'triggers' 字段缺失或为空列表")
+                    total_issues += 1
+
+            elif category == "character_linked":
+                for required_field in ("linked_character", "condition", "trigger_field_in_character"):
+                    if not is_nonempty_string(entry.get(required_field)):
+                        result.fail(
+                            f"character_linked '{label}': 缺少必填字段 '{required_field}'"
+                        )
+                        total_issues += 1
+
+            # H-3: file existence check (skip for planned / deprecated)
+            if category not in SKIP_EXISTENCE and is_nonempty_string(file_val):
+                target = root / file_val
+                if not target.exists():
+                    result.fail(f"{category} '{file_val}': 注册的文件在磁盘上不存在")
+                    total_issues += 1
+
+    if total_issues == 0:
+        result.ok("注册表结构完整，所有注册文件均已存在于磁盘")
+
+
 # ---------------------------------------------------------------------------
 # File discovery and routing
 # ---------------------------------------------------------------------------
 
 def should_skip(filepath: Path) -> bool:
-    """Skip template files whose name starts with underscore."""
+    """Skip template files whose name starts with underscore.
+
+    Exception: _config-registry.yaml has its own dedicated validator and
+    must not be skipped.
+    """
+    if filepath.name == "_config-registry.yaml":
+        return False
     return filepath.name.startswith("_")
 
 
@@ -1179,6 +1266,8 @@ def detect_and_validate(filepath: Path, root: Path) -> FileResult:
         "state/character-appearances.yaml",
     ):
         validate_yaml_parseable(data, result)
+    elif rel_posix == "config/_config-registry.yaml":
+        validate_config_registry(data, result, root)
     elif rel_posix.startswith("config/") and filepath.suffix == ".yaml":
         validate_yaml_parseable(data, result)
     elif (
@@ -1263,20 +1352,21 @@ def discover_files(root: Path) -> list[Path]:
             if not should_skip(f):
                 files.append(f)
 
-    # state YAML files
+    # state YAML files (dedicated validators or parse-only)
     for name in (
-        "relationships.yaml",
-        "timeline.yaml",
-        "world-state.yaml",
-        "plot-pattern-tracker.yaml",
-        "milestones.yaml",
-        "pacing-tracker.yaml",
-        "emotion-threads.yaml",
+        "relationships.yaml", "timeline.yaml", "world-state.yaml",
+        "plot-pattern-tracker.yaml", "milestones.yaml",
+        "pacing-tracker.yaml", "emotion-threads.yaml",
         "character-appearances.yaml",
     ):
         p = root / "state" / name
         if p.exists():
             files.append(p)
+
+    # config/_config-registry.yaml (dedicated structural validator)
+    p = root / "config" / "_config-registry.yaml"
+    if p.exists():
+        files.append(p)
 
     # config YAML files (parse validation)
     config_dir = root / "config"
