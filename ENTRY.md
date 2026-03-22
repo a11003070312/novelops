@@ -254,6 +254,12 @@ next_session:
 - `state/summaries/chapters/`：最近 3 章摘要，提取情绪出口状态
 - 已规划的 `outline/segments/`：了解已有段落避免重复
 - 当前卷大纲的 `key_events`：对齐宏观节奏进度
+- `outline/master-outline.md`：主线进度与终局设定，确认段落方向不偏离全书骨架
+- `outline/chapters/`：已规划但未写的章节大纲，避免与已定内容重复或冲突
+
+**读取后强制：提取卷大纲未完成 key_event 清单**
+
+从卷大纲 `key_events` 中筛出 chapter 号不在任何段落 `chapters_produced` 列表内的条目（已完成段落用 `chapters_produced`，规划中段落根据前序段落末章节号 + `estimated_chapters` 推算覆盖范围），按章节号升序排列为清单。此清单是 Phase 0.2 的硬性输入，不可跳过。
 
 ### Phase 0.2：自由发散 4 个段落走向方案
 
@@ -272,6 +278,7 @@ next_session:
 - 覆盖不同情绪基调（紧绷/轻快/压抑/爽/悬疑等）
 - 至少 1 个方案回收或大力推进某条已积累的伏笔
 - 至少 1 个方案包含久未出场的重要配角
+- **至少 1 个方案必须推进卷大纲中下一个未完成的 key_event**（防止段落规划绕开重要剧情节点；多个未完成节点时，取章节号最小、即叙事顺序最早的那个）
 - 方案之间不重叠
 
 ### Phase 0.3：人类参与
@@ -1394,6 +1401,16 @@ python scripts/vector-search.py --rebuild
 - 大纲中描述的角色修为等级 == characters/*.md 中的当前值
 - 大纲中规划的修为突破事件不与 state/milestones.yaml 中已有记录重复
 - 大纲中角色的道具/能力引用与当前 inventory 一致
+- **卷大纲 event 覆盖验证**：从卷大纲找到下一章对应 event，逐句提取叙事行为，逐条确认每项已在 objectives 中有对应条目，有遗漏则补入后重新校验（与 6.1 生成前强制步骤是同一份对照，此处为完成后的验证）
+- **总纲方向校验**：检查本章规划的剧情走向是否与 outline/master-outline.md 的主线进度和核心冲突方向一致；如有明显偏离，标记 WARN 并说明原因（可能是合理的支线，但必须明确说明）
+
+**运行自动化校验（强制）：**
+
+```bash
+python scripts/check-consistency.py
+```
+
+check-consistency.py 第 14 项检查（卷大纲 event 关键词覆盖）会自动验证章节大纲 objectives 与卷大纲 event 的词汇重叠度；WARN 表示疑似覆盖不足，需人工对照确认。
 
 **6.2 强制：校验新大纲**
 

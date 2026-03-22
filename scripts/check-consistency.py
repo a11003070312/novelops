@@ -513,11 +513,10 @@ def check_relationship_target_existence(
     for rel in rels:
         if not isinstance(rel, dict):
             continue
-        # 支持两种字段名：from/to 或 source/target
-        from_id = rel.get("from") or rel.get("source")
-        to_id = rel.get("to") or rel.get("target")
-        from_name = rel.get("from_name") or rel.get("source_name", from_id)
-        to_name = rel.get("to_name") or rel.get("target_name", to_id)
+        from_id = rel.get("from")
+        to_id = rel.get("to")
+        from_name = rel.get("from_name", from_id)
+        to_name = rel.get("to_name", to_id)
 
         if from_id and from_id not in char_map:
             issues.append(f"关系记录中 from={from_id} ({from_name}) 不存在对应人物档案")
@@ -1071,6 +1070,95 @@ def check_segment_exit_state(root: Path, char_map: Dict[str, Path]) -> CheckResu
     return result
 
 
+def extract_phrases(text: str) -> Set[str]:
+    """从文本中提取 3 字以上的连续汉字片段，用于关键词覆盖比对。"""
+    return set(re.findall(r'[\u4e00-\u9fff]{3,}', text))
+
+
+def check_arc_event_coverage(
+    root: Path,
+    chapters: List[Tuple[int, dict, Path]],
+) -> CheckResult:
+    """检查 14: 章节大纲 objectives 与卷大纲 event 的关键词覆盖度。
+
+    对每个未发布的章节大纲，若对应卷大纲中存在该章节号的 event 条目，
+    则提取 event 中 3 字以上的汉字片段，检查是否至少有 1 个出现在
+    objectives 的文本中。未覆盖任何关键词 → WARN（疑似叙事行为遗漏）。
+    """
+    result = CheckResult(name="卷大纲 event 覆盖度")
+
+    if not chapters:
+        result.level = "SKIP"
+        result.messages.append("未找到章节大纲文件")
+        return result
+
+    arc_dir = root / "outline" / "arcs"
+    if not arc_dir.is_dir():
+        result.level = "SKIP"
+        result.messages.append("outline/arcs/ 目录不存在")
+        return result
+
+    # 构建 chapter_number -> [event_text, ...] 映射（跨所有卷，同章可有多条 event）
+    chapter_event_map: Dict[int, List[str]] = {}
+    for arc_file in sorted(arc_dir.glob("arc-*.yaml")):
+        if arc_file.name.startswith("_"):
+            continue
+        arc_data = read_yaml_file(arc_file)
+        if not isinstance(arc_data, dict):
+            continue
+        for event_entry in safe_list(arc_data.get("key_events")):
+            if not isinstance(event_entry, dict):
+                continue
+            chap_num = event_entry.get("chapter")
+            event_text = event_entry.get("event", "")
+            if isinstance(chap_num, int) and event_text:
+                chapter_event_map.setdefault(chap_num, []).append(str(event_text))
+
+    if not chapter_event_map:
+        result.level = "SKIP"
+        result.messages.append("卷大纲中无 key_events 记录")
+        return result
+
+    warnings: List[str] = []
+    checked = 0
+
+    for chap_num, data, fp in chapters:
+        if data.get("status") == "published":
+            continue
+        event_texts = chapter_event_map.get(chap_num)
+        if not event_texts:
+            continue  # 该章节在卷大纲中无对应 event，无需检查
+
+        # 合并 objectives 文本（只计算一次）
+        objectives = safe_list(data.get("objectives"))
+        objectives_text = " ".join(str(o) for o in objectives)
+
+        # 逐条 event 检查（同章可有多条）
+        for event_text in event_texts:
+            checked += 1
+            event_phrases = extract_phrases(event_text)
+            if not event_phrases:
+                continue  # event 文本过短，无法提取有效片段
+
+            matched = any(phrase in objectives_text for phrase in event_phrases)
+            if not matched:
+                warnings.append(
+                    f"chapter-{chap_num:04d}: objectives 与卷大纲 event 无关键词重叠，"
+                    f"疑似叙事行为遗漏。event 关键片段示例: "
+                    f"{', '.join(list(event_phrases)[:3])}"
+                )
+
+    if warnings:
+        result.level = "WARN"
+        result.messages = warnings
+    else:
+        result.level = "PASS"
+        result.messages.append(
+            f"共检查 {checked} 个章节大纲，objectives 均与卷大纲 event 有关键词重叠"
+        )
+    return result
+
+
 # ---------------------------------------------------------------------------
 # 报告输出
 # ---------------------------------------------------------------------------
@@ -1181,6 +1269,9 @@ def main() -> int:
 
     # 13. 已完成段落 exit_state 验证
     results.append(check_segment_exit_state(root, char_map))
+
+    # 14. 卷大纲 event 关键词覆盖度
+    results.append(check_arc_event_coverage(root, chapters))
 
     return print_report(results)
 
