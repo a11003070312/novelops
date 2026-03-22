@@ -63,7 +63,7 @@ Each chapter follows these phases in strict order. Never skip phases or end a se
 | 2 | Write Chapter (Claude Two-Draft) | Claude assembles minimal creative prompt (story + character + 3 fixed writing rules + project-specific constraints); spawns isolated sub-agent for initial draft; Claude fact-checks draft; Claude refines final draft (fixes banned words, modern terms, translation tone) | `search-facts.py`, `vector-search.py` (draft fact-check) |
 | 3 | Post-write Self-Check | Scan violations, verify objectives, check emotion thread accumulation, detect state changes | `scan-text.py` on chapter file |
 | 4 | Human Review | Wait for approval; modify or rewrite as requested | -- |
-| 4.5 | Title Finalization | Review final content, propose 3-4 candidate titles with rationale, human selects; update chapter file and outline | -- |
+| 4.5 | Title Finalization | **Before selecting title**: run the Python title-list command (see ENTRY.md Phase 4.5) to get all used titles — handles both ASCII space and U+3000 separators. Proposed title MUST NOT appear in the list (strip punctuation before comparing). Style rules: prefer concrete images/numbers/actions unique to this chapter; avoid reusing narrative label words (e.g. "待查" "待定" "原因不明"). In autonomous mode: auto-select and verify uniqueness. In supervised mode: propose 3-4 candidates, all verified unique. | -- |
 | 5 | State Updates | Update characters, plot-threads, emotion-threads, timeline, world-state, facts, summary, changelog; rebuild vector index | `check-schema.py`, `check-consistency.py`, `vector-search.py --rebuild` |
 | 6 | Wrap-up | Generate next chapter outline, update session-state | `check-schema.py` on new outline |
 
