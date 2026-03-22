@@ -1376,6 +1376,12 @@ python scripts/vector-search.py --rebuild
 
 **6.1 生成下一章大纲草稿**
 
+**生成前强制：对照卷大纲 event 字段**
+
+从 `outline/arcs/{当前卷}.yaml` 找到下一章对应的 `event` 原文，逐句提取其中所有**叙事行为**（谁、做了什么、用了什么方式），列出清单，然后确认每条行为都对应到 objectives 中的某一项。未覆盖的行为必须补入 objectives，不得遗漏。
+
+示例：卷大纲 event 写"以外出采药为由离开陆家"，则 objectives 中必须有对应条目，描述这个告别/借口场景的具体执行——不能只写"走出去的动机"。
+
 基于以下信息生成 outline/chapters/chapter-{下一章}.yaml：
 - 当前卷大纲的 key_events（对齐宏观节奏）
 - 本章结尾的悬念钩子
